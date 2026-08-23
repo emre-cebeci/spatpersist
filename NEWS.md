@@ -1,6 +1,6 @@
-# spatialid 0.0.0.9000
+# spatialid 0.1.0
 
-## Initial development release
+## Initial release candidate
 
 - Create persistent spatial identity, boundary-version, and lineage identifiers
   for longitudinal polygon data.

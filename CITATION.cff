@@ -8,6 +8,6 @@ authors:
 abstract: >-
   Tools for creating persistent identifiers, boundary versions, and spatial
   lineages for polygon units observed over time.
-version: 0.0.0.9000
+version: 0.1.0
 license: MIT
 repository-code: "https://github.com/emre-cebeci/spatialid"
