@@ -172,6 +172,28 @@ Validation confirms structural consistency; it does not prove that a chosen
 spatial continuity rule is substantively correct for a particular research
 design. Thresholds and diagnostics should still be reviewed.
 
+## Calibrate before production
+
+Matching parameters encode a research decision and should be calibrated before
+IDs are frozen. A practical calibration workflow is:
+
+1. Transform geographic coordinates to an appropriate equal-area projected
+   CRS and choose a precision suitable for the source maps.
+2. Define the relative cost of a false continuation and a false new identity.
+3. Compare a small grid of metrics, thresholds, and matching rules against any
+   trusted links or independently reviewed transitions.
+4. Inspect disagreement cases and selected links with low confidence or
+   `match_ambiguous = TRUE`.
+5. Set `max_time_gap` explicitly when continuity should not cross missing
+   periods.
+6. Record the chosen parameters and preserve the accepted output as a registry.
+
+Agreement with an existing identifier system is evidence, not proof. A
+reference system may use names, institutional knowledge, or other attributes
+that `spatialid` intentionally does not use. Persistent disagreements should
+therefore be interpreted substantively rather than resolved by maximizing a
+single aggregate score.
+
 ## Preserve IDs across reruns
 
 Passing a prior result as `registry` protects issued IDs when rows are reordered
