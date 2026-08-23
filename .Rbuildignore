@@ -2,4 +2,5 @@
 ^\.Rproj\.user$
 ^\.github$
 ^CITATION\.cff$
+^CONTRIBUTING\.md$
 ^LICENSE\.md$

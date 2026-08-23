@@ -1,6 +1,7 @@
 name: test-coverage
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -9,9 +10,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-coverage:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}

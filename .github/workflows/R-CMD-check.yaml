@@ -1,6 +1,7 @@
 name: R-CMD-check
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -9,10 +10,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   R-CMD-check:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 45
 
     strategy:
       fail-fast: false

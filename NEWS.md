@@ -12,3 +12,6 @@
 - Exercise the package with synthetic examples, automated tests, and a
   reproducible scalability benchmark.
 - Document calibration and production workflows in the package vignette.
+- Lock the intentional public API with a regression test and add contributor
+  guidance that requires synthetic or public reproducible examples.
+- Allow manual CI runs, cancel superseded runs, and bound check duration.

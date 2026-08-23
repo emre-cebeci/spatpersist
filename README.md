@@ -165,3 +165,10 @@ controls are also available.
   assumptions.
 
 See `vignette("spatialid-workflow")` for a complete walkthrough.
+
+## Contributing
+
+Bug reports and contributions are welcome. Please use only synthetic or public
+data in issues, examples, and pull requests; do not upload confidential or
+restricted datasets. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development
+and reporting workflow.
