@@ -14,7 +14,7 @@ public distribution requires explicit approval from the package author.
 - [x] Run package checks on release, development, and old-release R versions
       across Linux, macOS, and Windows.
 - [x] Enforce the configured test-coverage threshold.
-- [ ] Complete substantive calibration and adjudication for the intended
+- [x] Complete substantive calibration and adjudication for the intended
       research workflow outside the package repository.
 
 ## Final privacy gate
@@ -27,6 +27,8 @@ public distribution requires explicit approval from the package author.
 - [ ] Remove unsafe files from Git history if the audit finds any, then repeat
       the audit against the rewritten repository.
 - [ ] Inspect the exact source archive that would be distributed.
+- [ ] Build any locally distributed archive with an impersonal creator field,
+      for example `R CMD build --user=spatialid-release spatialid`.
 
 ## Publication gate
 

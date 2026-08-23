@@ -47,3 +47,33 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Editor and operating-system metadata
+.DS_Store
+*.swp
+*.swo
+*.swx
+*~
+
+# Local data and calibration artifacts (force-add only after explicit review)
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.xlsx
+*.xls
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.sqlite
+*.rds
+*.RData
+*.rda
+*.rdata
+/private/
+/local-data/
+/validation-output/
+/calibration-output/

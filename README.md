@@ -161,7 +161,7 @@ controls are also available.
 - A reproducible scalability benchmark is included under
   `inst/benchmarks`; performance still depends strongly on polygon complexity
   and the number of candidate intersections.
-- The package contains no bundled administrative datasets or domain-specific administrative
+- The package contains no bundled administrative datasets or domain-specific
   assumptions.
 
 See `vignette("spatialid-workflow")` for a complete walkthrough.

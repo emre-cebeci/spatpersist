@@ -1,0 +1,42 @@
+name: privacy-audit
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reject private artifact types
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden="$({
+            git ls-files | grep -E -i '\.(gpkg|shp|shx|dbf|prj|cpg|xlsx|xls|csv|tsv|parquet|feather|sqlite|rds|rdata|rda|swp|swo|swx)$'
+            git ls-files | grep -E '(^|/)(private|local-data|validation-output|calibration-output)/'
+          } || true)"
+          if [[ -n "$forbidden" ]]; then
+            printf '%s\n' "Tracked private or local artifact types:" "$forbidden"
+            exit 1
+          fi
+
+      - name: Reject local filesystem paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches="$({
+            git grep -I -n -E '/Users/[^/]+/|[A-Za-z]:\\Users\\[^\\]+\\|Mobile Documents/com~apple~CloudDocs' -- . \
+              ':(exclude).github/workflows/privacy-audit.yaml'
+          } || true)"
+          if [[ -n "$matches" ]]; then
+            printf '%s\n' "Local filesystem paths detected:" "$matches"
+            exit 1
+          fi
