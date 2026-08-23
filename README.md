@@ -1,5 +1,8 @@
 # spatialid
 
+[![R-CMD-check](https://github.com/emre-cebeci/spatialid/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/emre-cebeci/spatialid/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/emre-cebeci/spatialid/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/emre-cebeci/spatialid/actions/workflows/test-coverage.yaml)
+
 `spatialid` creates persistent identifiers for polygon units observed over
 time. It is designed for datasets in which names, labels, and boundaries may
 change and reliable longitudinal IDs do not already exist.

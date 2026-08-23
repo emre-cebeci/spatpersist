@@ -14,6 +14,8 @@ Description:
     rules for identifying continuity, boundary changes, and spatial
     lineages in longitudinal polygon datasets.
 License: MIT + file LICENSE
+URL: https://github.com/emre-cebeci/spatialid
+BugReports: https://github.com/emre-cebeci/spatialid/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports: 
