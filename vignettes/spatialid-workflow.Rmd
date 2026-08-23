@@ -211,8 +211,16 @@ identical(rerun$spatial_id, result$spatial_id)
 ```
 
 Registry recovery uses same-time geometry and defaults to an IoU of 0.999999.
-Conflicts stop with an error. New identities are numbered above the registry's
-largest existing spatial ID.
+Conflicting identity or geometry-version anchors stop with an error. New
+identities are numbered above the registry's largest existing spatial ID. If
+new spatial evidence joins observations anchored to multiple existing
+lineages, the joined component deliberately consolidates to the
+lexicographically smallest existing `lineage_id`.
+
+All generated identifiers are dataset-local. Separate projects independently
+start with identifiers such as `SID000001` and `LID000001`, so combine outputs
+only with an additional project or dataset key. Persistence is scoped to one
+dataset and its registry chain, not to a global namespace.
 
 ## Geometry and time controls
 
@@ -230,6 +238,10 @@ result <- create_spatial_ids(
 `geometry_precision` sets an `sf` precision scale before spatial operations.
 For example, `geometry_precision = 100` rounds coordinates to two decimal
 places when geometries are passed to spatial libraries.
+
+After repair and precision are applied, exact coextensive geometries within one
+time period are rejected. Because attributes are intentionally excluded from
+matching, no reproducible spatial tie-breaker exists for those observations.
 
 `max_time_gap` prevents continuity across large gaps in numeric or date-based
 time columns. Its units are the time column's numeric units, days for `Date`,

@@ -9,10 +9,13 @@ Authors@R:
       role = c("aut", "cre")
     )
 Description:
-    Provides tools for creating persistent identifiers for spatial
-    units observed across time. The package supports configurable
-    rules for identifying continuity, boundary changes, and spatial
-    lineages in longitudinal polygon datasets.
+    Creates dataset-local persistent identifiers for polygon units observed
+    across time. Configurable overlap metrics, thresholds, and one-to-one
+    matching rules identify continuity while separate identifiers track
+    boundary versions and broader lineages through splits, mergers, and
+    replacements. Candidate-link diagnostics, validation checks, registry
+    reconciliation, and lineage summaries keep the resulting decisions
+    inspectable and reproducible.
 License: MIT + file LICENSE
 URL: https://github.com/emre-cebeci/spatialid
 BugReports: https://github.com/emre-cebeci/spatialid/issues

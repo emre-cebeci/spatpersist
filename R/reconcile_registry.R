@@ -44,6 +44,11 @@ match_registry_rows <- function(
     geometry_action = "error",
     geometry_precision = geometry_precision
   )
+  check_coextensive_rows(
+    registry,
+    time = time,
+    argument = "`registry`"
+  )
 
   valid_spatial_ids <- grepl("^SID[0-9]+$", registry$spatial_id)
   if (any(is.na(valid_spatial_ids) | !valid_spatial_ids)) {

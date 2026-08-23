@@ -69,8 +69,11 @@ Defaults to \code{Inf}. Finite values require a numeric, \code{Date}, or \code{P
 time column; \code{Date} gaps use days and \code{POSIXt} gaps use seconds.}
 
 \item{registry}{Optional prior \code{sf} result from \code{create_spatial_ids()}.
-Same-time geometries are used to preserve previously issued spatial,
-geometry-version, and lineage identifiers across reruns.}
+Same-time geometries are used to preserve previously issued spatial and
+geometry-version identifiers across reruns. Existing lineage identifiers
+are also retained unless new spatial evidence connects multiple registry
+lineages; the connected component then uses the lexicographically smallest
+existing lineage identifier.}
 
 \item{registry_threshold}{Minimum same-time IoU required to recover an
 observation from \code{registry}.}
@@ -96,6 +99,12 @@ replacements, and complex reorganizations.
 
 Candidate-link diagnostics are stored with the result and can be retrieved
 with \code{spatialid_transitions()}.
+
+Identifiers are dataset-local. Values such as \code{SID000001} and \code{LID000001}
+are persistent only within one dataset and its registry chain; they are not
+globally unique across independent projects. Exact same-period coextensive
+geometries are rejected because geometry-only matching cannot distinguish
+their identities reproducibly.
 }
 \examples{
 data <- spatialid_example()

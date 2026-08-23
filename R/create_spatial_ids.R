@@ -14,6 +14,12 @@
 #' Candidate-link diagnostics are stored with the result and can be retrieved
 #' with [spatialid_transitions()].
 #'
+#' Identifiers are dataset-local. Values such as `SID000001` and `LID000001`
+#' are persistent only within one dataset and its registry chain; they are not
+#' globally unique across independent projects. Exact same-period coextensive
+#' geometries are rejected because geometry-only matching cannot distinguish
+#' their identities reproducibly.
+#'
 #' @param data An `sf` object containing polygon geometries observed over time.
 #' @param time A single character string naming the time column in `data`.
 #' @param threshold A number from 0 to 1 giving the minimum overlap required
@@ -47,8 +53,11 @@
 #'   Defaults to `Inf`. Finite values require a numeric, `Date`, or `POSIXt`
 #'   time column; `Date` gaps use days and `POSIXt` gaps use seconds.
 #' @param registry Optional prior `sf` result from [create_spatial_ids()].
-#'   Same-time geometries are used to preserve previously issued spatial,
-#'   geometry-version, and lineage identifiers across reruns.
+#'   Same-time geometries are used to preserve previously issued spatial and
+#'   geometry-version identifiers across reruns. Existing lineage identifiers
+#'   are also retained unless new spatial evidence connects multiple registry
+#'   lineages; the connected component then uses the lexicographically smallest
+#'   existing lineage identifier.
 #' @param registry_threshold Minimum same-time IoU required to recover an
 #'   observation from `registry`.
 #'
@@ -188,6 +197,7 @@ create_spatial_ids <- function(
     geometry_action = geometry_action,
     geometry_precision = geometry_precision
   )
+  check_coextensive_rows(data, time = time)
 
   observed_times <- sort(unique(data[[time]]))
   rows_by_time <- lapply(

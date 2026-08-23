@@ -23,8 +23,6 @@ Install the development version from GitHub:
 remotes::install_github("emre-cebeci/spatialid")
 ```
 
-For a private repository, GitHub authentication must be configured first.
-
 ## Quick start
 
 ```r
@@ -66,6 +64,11 @@ The result remains an `sf` object in its original row order.
 
 Selected links also receive `match_score`, `match_confidence`, and
 `match_ambiguous`. Registry recovery is recorded in `registry_matched`.
+
+Identifiers are dataset-local, not globally unique. Independent projects can
+both contain values such as `SID000001`; persistence is guaranteed only within
+one dataset and its registry chain. Add a project-specific key when combining
+outputs from unrelated datasets.
 
 ## Matching controls
 
@@ -136,13 +139,19 @@ updated_result <- create_spatial_ids(
 )
 ```
 
-Conflicting registry evidence stops reconciliation rather than silently
-renumbering identities.
+Conflicting registry identity or geometry-version evidence stops
+reconciliation rather than silently renumbering identities. Lineages are
+different: if new spatial evidence connects observations anchored to multiple
+registry lineages, the complete connected component is consolidated under the
+lexicographically smallest existing `lineage_id`.
 
 ## Input requirements
 
 - An `sf` object containing only `POLYGON` or `MULTIPOLYGON` geometries.
 - One observation per spatial unit and time period.
+- No exact coextensive geometries within the same time period. Geometry-only
+  matching cannot distinguish their identities reproducibly, so they are
+  rejected with an error.
 - A non-missing, sortable time column.
 - Valid, non-empty geometries with positive area.
 - A consistent CRS across current data and any registry.

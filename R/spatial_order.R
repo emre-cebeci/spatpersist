@@ -3,6 +3,73 @@
 # Internal helper used to make ID allocation and spatial tie-breaking
 # reproducible when input rows are reordered.
 #
+check_coextensive_rows <- function(data, time, argument = "`data`") {
+
+  time_keys <- as.character(data[[time]])
+
+  for (time_key in unique(time_keys)) {
+    rows <- which(time_keys == time_key)
+    if (length(rows) < 2L) {
+      next
+    }
+
+    geometry <- sf::st_geometry(data[rows, ])
+    bounding_boxes <- t(
+      vapply(
+        geometry,
+        function(feature) as.numeric(sf::st_bbox(feature)),
+        numeric(4)
+      )
+    )
+    precision <- sf::st_precision(geometry)
+    if (is.finite(precision) && precision > 0) {
+      bounding_boxes <- round(bounding_boxes * precision) / precision
+    }
+    candidate_keys <- data.frame(
+      xmin = bounding_boxes[, 1L],
+      ymin = bounding_boxes[, 2L],
+      xmax = bounding_boxes[, 3L],
+      ymax = bounding_boxes[, 4L]
+    )
+    tied <- duplicated(candidate_keys) |
+      duplicated(candidate_keys, fromLast = TRUE)
+    if (!any(tied)) {
+      next
+    }
+
+    candidate_rows <- rows[tied]
+    equal_geometries <- sf::st_equals(geometry[tied], sparse = TRUE)
+
+    for (position in seq_along(equal_geometries)) {
+      later_matches <- equal_geometries[[position]][
+        equal_geometries[[position]] > position
+      ]
+      if (length(later_matches) == 0L) {
+        next
+      }
+
+      first_row <- candidate_rows[[position]]
+      second_row <- candidate_rows[[later_matches[[1L]]]]
+      stop(
+        "Exact same-period coextensive geometries are unsupported: ",
+        argument,
+        " rows ",
+        first_row,
+        " and ",
+        second_row,
+        " are spatially identical at time `",
+        time_key,
+        "`. Geometry-only matching cannot distinguish their identities ",
+        "reproducibly.",
+        call. = FALSE
+      )
+    }
+  }
+
+  invisible(NULL)
+}
+
+
 order_spatial_rows <- function(data, rows) {
 
   geometry <- sf::st_geometry(data[rows, ])

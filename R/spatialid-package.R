@@ -17,14 +17,17 @@
 #' @section Reproducible reruns:
 #' A registry written by [create_spatial_ids()] can be supplied to a later run
 #' so that already-observed units retain their identifiers. Registry matches
-#' are reported in the `registry_matched` output column.
+#' are reported in the `registry_matched` output column. If new spatial evidence
+#' connects multiple prior lineages, they consolidate under the smallest
+#' existing lineage identifier.
 #'
 #' @section Interpretation:
 #' A persistent ID represents continuity under the selected overlap rule; it is
 #' not a claim that the polygon is geometrically unchanged. Geometry changes
 #' receive new version IDs. Splits, merges, births, deaths, and ambiguous
 #' candidates remain visible in the audit outputs rather than being silently
-#' collapsed.
+#' collapsed. All identifiers are dataset-local, not globally unique: their
+#' persistence is scoped to one dataset and its registry chain.
 #'
 #' @seealso `vignette("spatialid-workflow", package = "spatialid")`
 #' @keywords internal
