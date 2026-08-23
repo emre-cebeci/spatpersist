@@ -1,6 +1,6 @@
 # Describe how units enter an observed time period
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 describe_transitions <- function(
     overlap,
@@ -89,7 +89,7 @@ describe_transitions <- function(
 
 # Assign lineage identifiers across all observations
 #
-# Internal helper used by create_spatial_ids(). Uses a disjoint-set structure
+# Internal helper used by persist_ids(). Uses a disjoint-set structure
 # to identify connected components of accepted continuity and strong spatial
 # lineage links.
 #

@@ -1,4 +1,4 @@
-# spatialid release checklist
+# spatpersist release checklist
 
 Completing technical checks does not authorize publication. Creating a Git
 tag, GitHub release, public repository, package-registry submission, or other
@@ -28,7 +28,7 @@ public distribution requires explicit approval from the package author.
       the audit against the rewritten repository.
 - [x] Inspect the exact source archive that would be distributed.
 - [x] Build any locally distributed archive with an impersonal creator field,
-      for example `R CMD build --user=spatialid-release spatialid`.
+      for example `R CMD build --user=spatpersist-release spatpersist`.
 
 ## Publication gate
 

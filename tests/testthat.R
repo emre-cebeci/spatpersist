@@ -1,4 +1,4 @@
 library(testthat)
-library(spatialid)
+library(spatpersist)
 
-test_check("spatialid")
+test_check("spatpersist")

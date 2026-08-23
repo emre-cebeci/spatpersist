@@ -4,7 +4,7 @@
 #' span, number of observations and geometry versions, registry recovery count,
 #' ambiguity count, and minimum non-missing match confidence.
 #'
-#' @param data A result returned by [create_spatial_ids()].
+#' @param data A result returned by [persist_ids()].
 #' @param time A single character string naming the time column in `data`.
 #'
 #' @return A data frame with one row per persistent spatial identity.
@@ -12,10 +12,10 @@
 #' @export
 #'
 #' @examples
-#' result <- create_spatial_ids(spatialid_example(), time = "year")
-#' spatialid_lineages(result, time = "year")
+#' result <- persist_ids(example_units(), time = "year")
+#' id_lineages(result, time = "year")
 #'
-spatialid_lineages <- function(data, time) {
+id_lineages <- function(data, time) {
 
   if (!is.data.frame(data)) {
     stop("`data` must be a data frame or sf object.")
@@ -39,7 +39,7 @@ spatialid_lineages <- function(data, time) {
   missing_columns <- setdiff(required_columns, names(data))
   if (length(missing_columns) > 0L) {
     stop(
-      "`data` is missing spatialid columns: ",
+      "`data` is missing spatpersist columns: ",
       paste(missing_columns, collapse = ", "),
       "."
     )
@@ -78,7 +78,7 @@ spatialid_lineages <- function(data, time) {
       stop(
         "Spatial ID `",
         spatial_id,
-        "` belongs to multiple lineages; run `validate_spatial_ids()`."
+        "` belongs to multiple lineages; run `validate_ids()`."
       )
     }
 

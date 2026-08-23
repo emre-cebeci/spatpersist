@@ -9,10 +9,10 @@
 #' @export
 #'
 #' @examples
-#' data <- spatialid_example()
+#' data <- example_units()
 #' plot(data["name"])
 
-spatialid_example <- function() {
+example_units <- function() {
   
   if (!requireNamespace("sf", quietly = TRUE)) {
     stop("Package 'sf' is required.")

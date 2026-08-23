@@ -1,7 +1,7 @@
-test_that("spatialid_lineages returns one auditable row per identity", {
-  result <- create_spatial_ids(spatialid_example(), time = "year")
+test_that("id_lineages returns one auditable row per identity", {
+  result <- persist_ids(example_units(), time = "year")
 
-  lineages <- spatialid_lineages(result, time = "year")
+  lineages <- id_lineages(result, time = "year")
   beta <- lineages[lineages$spatial_id == "SID000003", ]
   omega_family <- lineages[lineages$lineage_id == "LID000004", ]
 
@@ -19,20 +19,20 @@ test_that("spatialid_lineages returns one auditable row per identity", {
 })
 
 test_that("lineage diagnostics identify continuation and branch edges", {
-  result <- create_spatial_ids(spatialid_example(), time = "year")
-  diagnostics <- spatialid_transitions(result)
+  result <- persist_ids(example_units(), time = "year")
+  diagnostics <- id_transitions(result)
 
   expect_true(all(diagnostics$lineage_link))
   expect_equal(sum(diagnostics$lineage_link & diagnostics$selected), 3L)
   expect_equal(sum(diagnostics$lineage_link & !diagnostics$selected), 2L)
 })
 
-test_that("plot_spatial_lineage draws and returns filtered plot data", {
-  result <- create_spatial_ids(spatialid_example(), time = "year")
+test_that("plot_lineage draws and returns filtered plot data", {
+  result <- persist_ids(example_units(), time = "year")
   target <- tempfile(fileext = ".pdf")
 
   grDevices::pdf(target)
-  plotted <- plot_spatial_lineage(
+  plotted <- plot_lineage(
     result,
     time = "year",
     lineage_id = "LID000004",
@@ -49,18 +49,18 @@ test_that("plot_spatial_lineage draws and returns filtered plot data", {
   expect_equal(unique(plotted$nodes$lineage_id), "LID000004")
 })
 
-test_that("plot_spatial_lineage rejects unknown or stale lineage data", {
-  result <- create_spatial_ids(spatialid_example(), time = "year")
+test_that("plot_lineage rejects unknown or stale lineage data", {
+  result <- persist_ids(example_units(), time = "year")
 
   expect_error(
-    plot_spatial_lineage(result, time = "year", lineage_id = "LID999999"),
+    plot_lineage(result, time = "year", lineage_id = "LID999999"),
     "Unknown lineage ID"
   )
 
   stale <- result
   stale$spatial_id[[1L]] <- "SID999999"
   expect_error(
-    plot_spatial_lineage(stale, time = "year"),
+    plot_lineage(stale, time = "year"),
     "no longer align"
   )
 })

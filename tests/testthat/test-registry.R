@@ -1,6 +1,6 @@
 test_that("a registry preserves issued IDs when earlier-sorting units are added", {
-  data <- spatialid_example()
-  registry <- create_spatial_ids(data, time = "year")
+  data <- example_units()
+  registry <- persist_ids(data, time = "year")
 
   make_polygon <- function(xmin, xmax) {
     sf::st_polygon(
@@ -24,8 +24,8 @@ test_that("a registry preserves issued IDs when earlier-sorting units are added"
   )
   expanded <- rbind(data, added)
 
-  without_registry <- create_spatial_ids(expanded, time = "year")
-  with_registry <- create_spatial_ids(
+  without_registry <- persist_ids(expanded, time = "year")
+  with_registry <- persist_ids(
     expanded,
     time = "year",
     registry = registry
@@ -55,18 +55,18 @@ test_that("a registry preserves issued IDs when earlier-sorting units are added"
     with_registry$spatial_id[(nrow(data) + 1L):nrow(expanded)],
     rep("SID000007", 2)
   )
-  expect_equal(nrow(validate_spatial_ids(with_registry, time = "year")), 0L)
+  expect_equal(nrow(validate_ids(with_registry, time = "year")), 0L)
 })
 
 test_that("a registry anchors versions while later observations are appended", {
-  data <- spatialid_example()
-  registry <- create_spatial_ids(data, time = "year")
+  data <- example_units()
+  registry <- persist_ids(data, time = "year")
   later_beta <- data[4L, ]
   later_beta$year <- 2002
   later_beta$name <- "Beta later"
   extended <- rbind(data, later_beta)
 
-  result <- create_spatial_ids(
+  result <- persist_ids(
     extended,
     time = "year",
     registry = registry
@@ -78,7 +78,7 @@ test_that("a registry anchors versions while later observations are appended", {
     registry$spatial_version_id[[4L]]
   )
   expect_false(result$registry_matched[[10L]])
-  expect_equal(nrow(validate_spatial_ids(result, time = "year")), 0L)
+  expect_equal(nrow(validate_ids(result, time = "year")), 0L)
 })
 
 test_that("new evidence consolidates registry lineages deterministically", {
@@ -100,14 +100,14 @@ test_that("new evidence consolidates registry lineages deterministically", {
       make_polygon(1, 2)
     )
   )
-  registry <- create_spatial_ids(initial, time = "year")
+  registry <- persist_ids(initial, time = "year")
   bridge <- sf::st_sf(
     year = 2001,
     geometry = sf::st_sfc(make_polygon(0, 2))
   )
   expanded <- rbind(initial, bridge)
 
-  result <- create_spatial_ids(
+  result <- persist_ids(
     expanded,
     time = "year",
     registry = registry
@@ -119,34 +119,34 @@ test_that("new evidence consolidates registry lineages deterministically", {
   expect_equal(result$lineage_id, rep(expected_lineage, 3L))
   expect_true(all(result$registry_matched[1:2]))
   expect_false(result$registry_matched[[3L]])
-  expect_equal(nrow(validate_spatial_ids(result, time = "year")), 0L)
+  expect_equal(nrow(validate_ids(result, time = "year")), 0L)
 })
 
 test_that("conflicting registry identities stop reconciliation", {
-  data <- spatialid_example()
-  registry <- create_spatial_ids(data, time = "year")
+  data <- example_units()
+  registry <- persist_ids(data, time = "year")
   registry$spatial_id[[2L]] <- "SID999999"
   registry$spatial_version_id[[2L]] <- "SID999999-V001"
 
   expect_error(
-    create_spatial_ids(data, time = "year", registry = registry),
+    persist_ids(data, time = "year", registry = registry),
     "maps to multiple existing spatial IDs"
   )
 })
 
 test_that("registry CRS and structure are checked", {
-  data <- spatialid_example()
-  registry <- create_spatial_ids(data, time = "year")
+  data <- example_units()
+  registry <- persist_ids(data, time = "year")
   mismatched_crs <- sf::st_set_crs(registry, 4326)
   incomplete <- registry
   incomplete$spatial_version_id <- NULL
 
   expect_error(
-    create_spatial_ids(data, time = "year", registry = mismatched_crs),
+    persist_ids(data, time = "year", registry = mismatched_crs),
     "same coordinate reference system"
   )
   expect_error(
-    create_spatial_ids(data, time = "year", registry = incomplete),
+    persist_ids(data, time = "year", registry = incomplete),
     "missing required columns"
   )
 
@@ -154,7 +154,7 @@ test_that("registry CRS and structure are checked", {
   sf::st_geometry(duplicate_registry)[[3L]] <-
     sf::st_geometry(duplicate_registry)[[1L]]
   expect_error(
-    create_spatial_ids(data, time = "year", registry = duplicate_registry),
+    persist_ids(data, time = "year", registry = duplicate_registry),
     paste0(
       "Exact same-period coextensive geometries are unsupported: ",
       "`registry`"

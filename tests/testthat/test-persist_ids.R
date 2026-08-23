@@ -1,7 +1,7 @@
-test_that("create_spatial_ids preserves stable, changed, and renamed units", {
-  data <- spatialid_example()
+test_that("persist_ids preserves stable, changed, and renamed units", {
+  data <- example_units()
 
-  result <- create_spatial_ids(data, time = "year", threshold = 0.75)
+  result <- persist_ids(data, time = "year", threshold = 0.75)
 
   expect_s3_class(result, "sf")
   expect_equal(result$spatial_id[c(1, 2)], rep("SID000001", 2))
@@ -21,10 +21,10 @@ test_that("create_spatial_ids preserves stable, changed, and renamed units", {
   )
 })
 
-test_that("create_spatial_ids assigns new IDs to unmatched split children", {
-  data <- spatialid_example()
+test_that("persist_ids assigns new IDs to unmatched split children", {
+  data <- example_units()
 
-  result <- create_spatial_ids(data, time = "year", threshold = 0.75)
+  result <- persist_ids(data, time = "year", threshold = 0.75)
 
   expect_equal(result$spatial_id[[7]], "SID000004")
   expect_equal(result$spatial_id[c(8, 9)], c("SID000006", "SID000005"))
@@ -38,16 +38,16 @@ test_that("create_spatial_ids assigns new IDs to unmatched split children", {
   expect_equal(anyDuplicated(result$spatial_id[result$year == 2001]), 0L)
 })
 
-test_that("create_spatial_ids supports alternative overlap metrics", {
-  data <- spatialid_example()
+test_that("persist_ids supports alternative overlap metrics", {
+  data <- example_units()
 
-  strict_iou <- create_spatial_ids(
+  strict_iou <- persist_ids(
     data,
     time = "year",
     threshold = 0.9,
     metric = "iou"
   )
-  split_by_new_share <- create_spatial_ids(
+  split_by_new_share <- persist_ids(
     data,
     time = "year",
     threshold = 0.75,
@@ -60,48 +60,48 @@ test_that("create_spatial_ids supports alternative overlap metrics", {
   expect_equal(anyDuplicated(child_ids), 0L)
 })
 
-test_that("create_spatial_ids validates its public arguments", {
-  data <- spatialid_example()
+test_that("persist_ids validates its public arguments", {
+  data <- example_units()
 
-  expect_error(create_spatial_ids(data.frame(), "year"), "must be an sf object")
-  expect_error(create_spatial_ids(data, "missing"), "must name a column")
-  expect_error(create_spatial_ids(data, "year", -0.1), "from 0 to 1")
-  expect_error(create_spatial_ids(data, "year", metric = "dice"), "arg")
+  expect_error(persist_ids(data.frame(), "year"), "must be an sf object")
+  expect_error(persist_ids(data, "missing"), "must name a column")
+  expect_error(persist_ids(data, "year", -0.1), "from 0 to 1")
+  expect_error(persist_ids(data, "year", metric = "dice"), "arg")
   expect_error(
-    create_spatial_ids(data, "year", event_threshold = 2),
+    persist_ids(data, "year", event_threshold = 2),
     "`event_threshold`"
   )
   expect_error(
-    create_spatial_ids(data, "year", lineage_threshold = NA_real_),
+    persist_ids(data, "year", lineage_threshold = NA_real_),
     "`lineage_threshold`"
   )
   expect_error(
-    create_spatial_ids(data, "year", version_threshold = 1.1),
+    persist_ids(data, "year", version_threshold = 1.1),
     "`version_threshold`"
   )
   expect_error(
-    create_spatial_ids(data, "year", geometry_precision = 0),
+    persist_ids(data, "year", geometry_precision = 0),
     "`geometry_precision`"
   )
   expect_error(
-    create_spatial_ids(data, "year", max_time_gap = 0),
+    persist_ids(data, "year", max_time_gap = 0),
     "`max_time_gap`"
   )
   expect_error(
-    create_spatial_ids(data, "year", ambiguity_tolerance = -0.1),
+    persist_ids(data, "year", ambiguity_tolerance = -0.1),
     "`ambiguity_tolerance`"
   )
   expect_error(
-    create_spatial_ids(data, "year", match_rule = "optimal"),
+    persist_ids(data, "year", match_rule = "optimal"),
     "arg"
   )
   expect_error(
-    create_spatial_ids(data, "year", registry_threshold = 2),
+    persist_ids(data, "year", registry_threshold = 2),
     "`registry_threshold`"
   )
 })
 
-test_that("create_spatial_ids detects mergers and preserves their lineage", {
+test_that("persist_ids detects mergers and preserves their lineage", {
   make_polygon <- function(xmin, xmax) {
     sf::st_polygon(
       list(rbind(
@@ -124,7 +124,7 @@ test_that("create_spatial_ids detects mergers and preserves their lineage", {
     )
   )
 
-  result <- create_spatial_ids(data, time = "year")
+  result <- persist_ids(data, time = "year")
 
   expect_equal(result$transition_type[[3]], "merger")
   expect_equal(result$spatial_id[[3]], "SID000001")
@@ -134,14 +134,14 @@ test_that("create_spatial_ids detects mergers and preserves their lineage", {
 })
 
 test_that("lineages persist across a split and later continuations", {
-  example <- spatialid_example()
+  example <- example_units()
   split_children <- example[example$year == 2001 & grepl("Omega", example$name), ]
   later_children <- split_children
   later_children$year <- 2002
   later_children$name <- c("Renamed East", "Renamed West")
   data <- rbind(example, later_children)
 
-  result <- create_spatial_ids(data, time = "year")
+  result <- persist_ids(data, time = "year")
   omega <- grepl("Omega|Renamed", result$name)
 
   expect_equal(length(unique(result$lineage_id[omega])), 1L)
@@ -173,7 +173,7 @@ test_that("related replacements receive a new identity in the same lineage", {
     )
   )
 
-  result <- create_spatial_ids(data, time = "year")
+  result <- persist_ids(data, time = "year")
 
   expect_equal(result$spatial_id, c("SID000001", "SID000002"))
   expect_equal(result$lineage_id, rep("LID000001", 2))
@@ -182,12 +182,12 @@ test_that("related replacements receive a new identity in the same lineage", {
 })
 
 test_that("geometry-based IDs are invariant to input row order", {
-  data <- spatialid_example()
+  data <- example_units()
   data$source_row <- seq_len(nrow(data))
   shuffled <- data[c(9, 2, 7, 4, 1, 8, 3, 6, 5), ]
 
-  original_result <- create_spatial_ids(data, time = "year")
-  shuffled_result <- create_spatial_ids(shuffled, time = "year")
+  original_result <- persist_ids(data, time = "year")
+  shuffled_result <- persist_ids(shuffled, time = "year")
   shuffled_result <- shuffled_result[order(shuffled_result$source_row), ]
 
   output_columns <- c(
@@ -209,9 +209,9 @@ test_that("geometry-based IDs are invariant to input row order", {
 })
 
 test_that("transition diagnostics expose candidates and selected links", {
-  result <- create_spatial_ids(spatialid_example(), time = "year")
+  result <- persist_ids(example_units(), time = "year")
 
-  diagnostics <- spatialid_transitions(result)
+  diagnostics <- id_transitions(result)
   split_diagnostics <- diagnostics[diagnostics$transition_type == "split", ]
 
   expect_equal(nrow(diagnostics), 5L)
@@ -232,14 +232,14 @@ test_that("transition diagnostics expose candidates and selected links", {
   expect_true(all(split_diagnostics$same_lineage))
   expect_equal(unique(split_diagnostics$parent_id), "SID000004")
   expect_error(
-    spatialid_transitions(spatialid_example()),
+    id_transitions(example_units()),
     "does not contain"
   )
 })
 
-test_that("validate_spatial_ids reports structural problems", {
-  result <- create_spatial_ids(spatialid_example(), time = "year")
-  expect_equal(nrow(validate_spatial_ids(result, time = "year")), 0L)
+test_that("validate_ids reports structural problems", {
+  result <- persist_ids(example_units(), time = "year")
+  expect_equal(nrow(validate_ids(result, time = "year")), 0L)
 
   corrupted <- result
   corrupted$spatial_id[[4]] <- corrupted$spatial_id[[2]]
@@ -249,7 +249,7 @@ test_that("validate_spatial_ids reports structural problems", {
   corrupted$match_score[[2]] <- 1.5
   corrupted$match_confidence[[6]] <- NA_real_
 
-  issues <- validate_spatial_ids(corrupted, time = "year")
+  issues <- validate_ids(corrupted, time = "year")
 
   expect_true("duplicate_identity_within_time" %in% issues$check)
   expect_true("identity_multiple_lineages" %in% issues$check)
@@ -260,10 +260,10 @@ test_that("validate_spatial_ids reports structural problems", {
 })
 
 test_that("version thresholds can ignore small accepted boundary changes", {
-  data <- spatialid_example()
+  data <- example_units()
 
-  exact_versions <- create_spatial_ids(data, time = "year")
-  tolerant_versions <- create_spatial_ids(
+  exact_versions <- persist_ids(data, time = "year")
+  tolerant_versions <- persist_ids(
     data,
     time = "year",
     version_threshold = 0.8
@@ -302,7 +302,7 @@ test_that("geometry versions represent consecutive boundary spells", {
     )
   )
 
-  result <- create_spatial_ids(data, time = "year")
+  result <- persist_ids(data, time = "year")
 
   expect_equal(result$spatial_id, rep("SID000001", 4))
   expect_equal(
@@ -314,7 +314,7 @@ test_that("geometry versions represent consecutive boundary spells", {
       "SID000001-V003"
     )
   )
-  expect_equal(nrow(validate_spatial_ids(result, time = "year")), 0L)
+  expect_equal(nrow(validate_ids(result, time = "year")), 0L)
 })
 
 test_that("invalid polygons can be rejected or explicitly repaired", {
@@ -333,11 +333,11 @@ test_that("invalid polygons can be rejected or explicitly repaired", {
   )
 
   expect_error(
-    create_spatial_ids(data, time = "year"),
+    persist_ids(data, time = "year"),
     "Invalid geometries occur"
   )
 
-  repaired <- create_spatial_ids(
+  repaired <- persist_ids(
     data,
     time = "year",
     geometry_action = "repair"
@@ -357,14 +357,14 @@ test_that("empty polygon geometries are rejected before matching", {
   )
 
   expect_error(
-    create_spatial_ids(data, time = "year"),
+    persist_ids(data, time = "year"),
     "Empty geometries occur"
   )
 })
 
 test_that("geometry precision is retained in the result", {
-  result <- create_spatial_ids(
-    spatialid_example(),
+  result <- persist_ids(
+    example_units(),
     time = "year",
     geometry_precision = 100
   )
@@ -373,38 +373,38 @@ test_that("geometry precision is retained in the result", {
 })
 
 test_that("maximum time gaps can break otherwise valid continuations", {
-  data <- spatialid_example()[c(1, 2), ]
+  data <- example_units()[c(1, 2), ]
   data$year[[2]] <- 2002
 
-  connected <- create_spatial_ids(data, time = "year")
-  separated <- create_spatial_ids(data, time = "year", max_time_gap = 1)
+  connected <- persist_ids(data, time = "year")
+  separated <- persist_ids(data, time = "year", max_time_gap = 1)
 
   expect_equal(length(unique(connected$spatial_id)), 1L)
   expect_equal(length(unique(separated$spatial_id)), 2L)
   expect_equal(separated$transition_type, c("initial", "new"))
-  expect_equal(nrow(spatialid_transitions(separated)), 0L)
+  expect_equal(nrow(id_transitions(separated)), 0L)
 })
 
 test_that("finite maximum gaps require a measurable time column", {
-  data <- spatialid_example()[c(1, 2), ]
+  data <- example_units()[c(1, 2), ]
   data$period <- c("early", "late")
 
   expect_error(
-    create_spatial_ids(data, time = "period", max_time_gap = 1),
+    persist_ids(data, time = "period", max_time_gap = 1),
     "requires a numeric, Date, or POSIXt"
   )
 })
 
 test_that("ambiguous split continuations follow the requested policy", {
-  data <- spatialid_example()
+  data <- example_units()
 
-  flagged <- create_spatial_ids(
+  flagged <- persist_ids(
     data,
     time = "year",
     metric = "share_new",
     ambiguity_action = "flag"
   )
-  rejected <- create_spatial_ids(
+  rejected <- persist_ids(
     data,
     time = "year",
     metric = "share_new",
@@ -421,7 +421,7 @@ test_that("ambiguous split continuations follow the requested policy", {
   expect_equal(flagged$match_confidence[selected_child], 0)
   expect_false(any(rejected$spatial_id[flagged_children] == rejected$spatial_id[[7]]))
   expect_error(
-    create_spatial_ids(
+    persist_ids(
       data,
       time = "year",
       metric = "share_new",

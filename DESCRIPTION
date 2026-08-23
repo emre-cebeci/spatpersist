@@ -1,4 +1,4 @@
-Package: spatialid
+Package: spatpersist
 Title: Create Persistent Identifiers for Longitudinal Spatial Data
 Version: 0.1.0
 Authors@R:
@@ -17,8 +17,8 @@ Description:
     reconciliation, and lineage summaries keep the resulting decisions
     inspectable and reproducible.
 License: MIT + file LICENSE
-URL: https://github.com/emre-cebeci/spatialid
-BugReports: https://github.com/emre-cebeci/spatialid/issues
+URL: https://github.com/emre-cebeci/spatpersist
+BugReports: https://github.com/emre-cebeci/spatpersist/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports: 

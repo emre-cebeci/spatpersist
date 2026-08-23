@@ -1,12 +1,12 @@
 test_that("the intentional public API remains stable", {
   expected_exports <- c(
-    "create_spatial_ids",
-    "plot_spatial_lineage",
-    "spatialid_example",
-    "spatialid_lineages",
-    "spatialid_transitions",
-    "validate_spatial_ids"
+    "persist_ids",
+    "plot_lineage",
+    "example_units",
+    "id_lineages",
+    "id_transitions",
+    "validate_ids"
   )
 
-  expect_setequal(getNamespaceExports("spatialid"), expected_exports)
+  expect_setequal(getNamespaceExports("spatpersist"), expected_exports)
 })

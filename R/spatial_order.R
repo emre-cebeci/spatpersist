@@ -5,10 +5,12 @@
 #
 check_coextensive_rows <- function(data, time, argument = "`data`") {
 
-  time_keys <- as.character(data[[time]])
+  time_values <- data[[time]]
+  first_in_group <- !duplicated(time_values)
 
-  for (time_key in unique(time_keys)) {
-    rows <- which(time_keys == time_key)
+  for (first_row_in_group in which(first_in_group)) {
+    time_value <- time_values[first_row_in_group]
+    rows <- which(time_values == time_value)
     if (length(rows) < 2L) {
       next
     }
@@ -58,7 +60,7 @@ check_coextensive_rows <- function(data, time, argument = "`data`") {
         " and ",
         second_row,
         " are spatially identical at time `",
-        time_key,
+        format(time_value, digits = 17L),
         "`. Geometry-only matching cannot distinguish their identities ",
         "reproducibly.",
         call. = FALSE

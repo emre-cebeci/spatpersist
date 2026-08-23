@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ## The problem
 
 Longitudinal polygon datasets often lack identifiers that remain meaningful
-when boundaries or labels change. `spatialid` creates those identifiers from
+when boundaries or labels change. `spatpersist` creates those identifiers from
 spatial continuity. It does not require prior IDs and does not use names to
 determine identity.
 
@@ -31,9 +31,9 @@ This vignette uses a synthetic dataset containing four common cases:
 - one polygon that splits into two successors.
 
 ```{r example-data}
-library(spatialid)
+library(spatpersist)
 
-polygons <- spatialid_example()
+polygons <- example_units()
 sf::st_drop_geometry(polygons)
 ```
 
@@ -43,7 +43,7 @@ The default rule continues an identity when at least 75 percent of the earlier
 polygon is preserved. Candidate links are selected one-to-one.
 
 ```{r create}
-result <- create_spatial_ids(
+result <- persist_ids(
   polygons,
   time = "year",
   threshold = 0.75,
@@ -93,7 +93,7 @@ Three spatial metrics are available:
 Near ties are controlled separately:
 
 ```{r conservative-matching}
-conservative <- create_spatial_ids(
+conservative <- persist_ids(
   polygons,
   time = "year",
   metric = "iou",
@@ -120,7 +120,7 @@ Automatic identity decisions should remain inspectable. The transition table
 contains every positive-area overlap, not just selected links.
 
 ```{r diagnostics}
-transitions <- spatialid_transitions(result)
+transitions <- id_transitions(result)
 transitions[
   , c(
     "old_spatial_id",
@@ -140,13 +140,13 @@ transitions[
 An identity-level summary is also available:
 
 ```{r summaries}
-spatialid_lineages(result, time = "year")
+id_lineages(result, time = "year")
 ```
 
 ## Visualize splits and mergers
 
 ```{r plot-lineage}
-plot_spatial_lineage(
+plot_lineage(
   result,
   time = "year",
   lineage_id = "LID000004"
@@ -160,7 +160,7 @@ forcing either child to reuse the predecessor's identity.
 ## Validate the result
 
 ```{r validate}
-issues <- validate_spatial_ids(result, time = "year")
+issues <- validate_ids(result, time = "year")
 issues
 ```
 
@@ -190,7 +190,7 @@ IDs are frozen. A practical calibration workflow is:
 
 Agreement with an existing identifier system is evidence, not proof. A
 reference system may use names, institutional knowledge, or other attributes
-that `spatialid` intentionally does not use. Persistent disagreements should
+that `spatpersist` intentionally does not use. Persistent disagreements should
 therefore be interpreted substantively rather than resolved by maximizing a
 single aggregate score.
 
@@ -200,7 +200,7 @@ Passing a prior result as `registry` protects issued IDs when rows are reordered
 or new units are added.
 
 ```{r registry}
-rerun <- create_spatial_ids(
+rerun <- persist_ids(
   polygons,
   time = "year",
   registry = result
@@ -228,7 +228,7 @@ By default, invalid geometries stop processing. They can be repaired
 explicitly:
 
 ```r
-result <- create_spatial_ids(
+result <- persist_ids(
   polygons,
   time = "year",
   geometry_action = "repair"

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-# Reproducible scalability benchmark for spatialid. Run from the package source
+# Reproducible scalability benchmark for spatpersist. Run from the package source
 # directory after installing the current package with `R CMD INSTALL .`.
 
 arguments <- commandArgs(trailingOnly = TRUE)
@@ -13,8 +13,8 @@ parse_positive_integer <- function(value, name) {
   parsed
 }
 
-if (!requireNamespace("spatialid", quietly = TRUE)) {
-  stop("Install the current spatialid package before running this benchmark.")
+if (!requireNamespace("spatpersist", quietly = TRUE)) {
+  stop("Install the current spatpersist package before running this benchmark.")
 }
 if (!requireNamespace("sf", quietly = TRUE)) {
   stop("Package 'sf' is required.")
@@ -71,7 +71,7 @@ benchmark_case <- function(side) {
   for (repetition in seq_len(repetitions)) {
     gc()
     elapsed[[repetition]] <- system.time({
-      result <- spatialid::create_spatial_ids(
+      result <- spatpersist::persist_ids(
         input,
         time = "year",
         ambiguity_tolerance = 0
@@ -79,13 +79,13 @@ benchmark_case <- function(side) {
     })[["elapsed"]]
   }
 
-  issues <- spatialid::validate_spatial_ids(result, time = "year")
+  issues <- spatpersist::validate_ids(result, time = "year")
   data.frame(
     side = side,
     units_per_period = side^2,
     periods = periods,
     rows = nrow(input),
-    transition_edges = nrow(spatialid::spatialid_transitions(result)),
+    transition_edges = nrow(spatpersist::id_transitions(result)),
     median_seconds = stats::median(elapsed),
     minimum_seconds = min(elapsed),
     result_mb = as.numeric(object.size(result)) / 1024^2,
@@ -95,7 +95,7 @@ benchmark_case <- function(side) {
 }
 
 cat("R", as.character(getRversion()), "\n")
-cat("spatialid", as.character(utils::packageVersion("spatialid")), "\n")
+cat("spatpersist", as.character(utils::packageVersion("spatpersist")), "\n")
 cat("sf", as.character(utils::packageVersion("sf")), "\n")
 cat("GEOS", unname(sf::sf_extSoftVersion()[["GEOS"]]), "\n")
 cat("platform", R.version$platform, "\n")

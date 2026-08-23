@@ -1,9 +1,9 @@
 test_that("calculate_overlap returns expected statistics for example data", {
-  data <- spatialid_example()
+  data <- example_units()
   old <- data[data$year == 2000, ]
   new <- data[data$year == 2001, ]
 
-  result <- spatialid:::calculate_overlap(old, new)
+  result <- spatpersist:::calculate_overlap(old, new)
 
   expect_named(
     result,
@@ -33,11 +33,11 @@ test_that("calculate_overlap returns expected statistics for example data", {
 })
 
 test_that("calculate_overlap describes both branches of a split", {
-  data <- spatialid_example()
+  data <- example_units()
   old <- data[data$year == 2000, ]
   new <- data[data$year == 2001, ]
 
-  result <- spatialid:::calculate_overlap(old, new)
+  result <- spatpersist:::calculate_overlap(old, new)
   split <- result[result$old_id == 4L, ]
 
   expect_equal(nrow(split), 2L)
@@ -48,12 +48,12 @@ test_that("calculate_overlap describes both branches of a split", {
 })
 
 test_that("calculate_overlap returns a typed empty result for disjoint data", {
-  data <- spatialid_example()
+  data <- example_units()
   old <- data[data$year == 2000, ]
   new <- data[data$year == 2001, ]
   sf::st_geometry(new) <- sf::st_geometry(new) + c(100, 100)
 
-  result <- spatialid:::calculate_overlap(old, new)
+  result <- spatpersist:::calculate_overlap(old, new)
 
   expect_equal(nrow(result), 0L)
   expect_named(
@@ -71,22 +71,22 @@ test_that("calculate_overlap returns a typed empty result for disjoint data", {
 })
 
 test_that("calculate_overlap rejects non-sf inputs", {
-  data <- spatialid_example()
+  data <- example_units()
 
   expect_error(
-    spatialid:::calculate_overlap(data.frame(), data),
+    spatpersist:::calculate_overlap(data.frame(), data),
     "Both inputs must be sf objects",
     fixed = TRUE
   )
 })
 
 test_that("calculate_overlap rejects mismatched coordinate systems", {
-  data <- spatialid_example()
+  data <- example_units()
   old <- sf::st_set_crs(data[data$year == 2000, ], 4326)
   new <- sf::st_set_crs(data[data$year == 2001, ], 3857)
 
   expect_error(
-    spatialid:::calculate_overlap(old, new),
+    spatpersist:::calculate_overlap(old, new),
     "same coordinate reference system",
     fixed = TRUE
   )
@@ -104,7 +104,7 @@ test_that("calculate_overlap omits boundary-only intersections", {
     )
   )
 
-  result <- spatialid:::calculate_overlap(old, new)
+  result <- spatpersist:::calculate_overlap(old, new)
 
   expect_equal(nrow(result), 0L)
 })

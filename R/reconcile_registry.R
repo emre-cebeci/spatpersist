@@ -1,6 +1,6 @@
-# Match current observations to a prior spatialid result
+# Match current observations to a prior spatpersist result
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 match_registry_rows <- function(
     data,
@@ -10,7 +10,7 @@ match_registry_rows <- function(
     geometry_precision) {
 
   if (!inherits(registry, "sf")) {
-    stop("`registry` must be an sf result returned by `create_spatial_ids()`.")
+    stop("`registry` must be an sf result returned by `persist_ids()`.")
   }
 
   if (!(time %in% names(registry))) {
@@ -119,7 +119,7 @@ match_registry_rows <- function(
 
 # Reconcile newly calculated IDs with registry IDs
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 reconcile_registry_ids <- function(
     spatial_ids,
@@ -229,7 +229,7 @@ reconcile_registry_ids <- function(
 
 # Preserve registry lineage labels where possible
 #
-# Internal helper used by create_spatial_ids(). Newly connected registry
+# Internal helper used by persist_ids(). Newly connected registry
 # lineages consolidate deterministically to their smallest existing label.
 #
 reconcile_registry_lineages <- function(lineage_ids, registry_lineage) {

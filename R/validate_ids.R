@@ -14,10 +14,10 @@
 #' @export
 #'
 #' @examples
-#' result <- create_spatial_ids(spatialid_example(), time = "year")
-#' validate_spatial_ids(result, time = "year")
+#' result <- persist_ids(example_units(), time = "year")
+#' validate_ids(result, time = "year")
 #'
-validate_spatial_ids <- function(data, time) {
+validate_ids <- function(data, time) {
 
   if (!is.data.frame(data)) {
     stop("`data` must be a data frame or sf object.")

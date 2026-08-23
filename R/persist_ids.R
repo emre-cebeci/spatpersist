@@ -12,7 +12,7 @@
 #' replacements, and complex reorganizations.
 #'
 #' Candidate-link diagnostics are stored with the result and can be retrieved
-#' with [spatialid_transitions()].
+#' with [id_transitions()].
 #'
 #' Identifiers are dataset-local. Values such as `SID000001` and `LID000001`
 #' are persistent only within one dataset and its registry chain; they are not
@@ -52,7 +52,7 @@
 #' @param max_time_gap Maximum gap across which identities may continue.
 #'   Defaults to `Inf`. Finite values require a numeric, `Date`, or `POSIXt`
 #'   time column; `Date` gaps use days and `POSIXt` gaps use seconds.
-#' @param registry Optional prior `sf` result from [create_spatial_ids()].
+#' @param registry Optional prior `sf` result from [persist_ids()].
 #'   Same-time geometries are used to preserve previously issued spatial and
 #'   geometry-version identifiers across reruns. Existing lineage identifiers
 #'   are also retained unless new spatial evidence connects multiple registry
@@ -69,11 +69,11 @@
 #' @export
 #'
 #' @examples
-#' data <- spatialid_example()
-#' result <- create_spatial_ids(data, time = "year", threshold = 0.75)
+#' data <- example_units()
+#' result <- persist_ids(data, time = "year", threshold = 0.75)
 #' result[, c("year", "name", "spatial_id")]
 #'
-create_spatial_ids <- function(
+persist_ids <- function(
     data,
     time,
     threshold = 0.75,
@@ -383,7 +383,7 @@ create_spatial_ids <- function(
   data$match_confidence <- match_confidences
   data$match_ambiguous <- match_ambiguous
   data$registry_matched <- registry_matched
-  attr(data, "spatialid_transitions") <- build_transition_diagnostics(
+  attr(data, "id_transitions") <- build_transition_diagnostics(
     transition_edges = all_transition_edges,
     time_values = data[[time]],
     spatial_ids = spatial_ids,

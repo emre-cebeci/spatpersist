@@ -1,6 +1,6 @@
 # Build the transition diagnostics table
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 build_transition_diagnostics <- function(
     transition_edges,
@@ -102,27 +102,27 @@ build_transition_diagnostics <- function(
 #' Inspect spatial transition diagnostics
 #'
 #' Retrieves the candidate-link diagnostics created by
-#' [create_spatial_ids()]. The table contains every positive-area overlap
+#' [persist_ids()]. The table contains every positive-area overlap
 #' considered across successive observed periods, including its overlap
 #' statistics, mutual-best and ambiguity flags, candidate status, selection,
 #' and confidence.
 #'
-#' @param x An `sf` result returned by [create_spatial_ids()].
+#' @param x An `sf` result returned by [persist_ids()].
 #'
 #' @return A data frame of transition diagnostics.
 #'
 #' @export
 #'
 #' @examples
-#' result <- create_spatial_ids(spatialid_example(), time = "year")
-#' spatialid_transitions(result)
+#' result <- persist_ids(example_units(), time = "year")
+#' id_transitions(result)
 #'
-spatialid_transitions <- function(x) {
+id_transitions <- function(x) {
 
-  diagnostics <- attr(x, "spatialid_transitions", exact = TRUE)
+  diagnostics <- attr(x, "id_transitions", exact = TRUE)
 
   if (is.null(diagnostics)) {
-    stop("`x` does not contain spatialid transition diagnostics.")
+    stop("`x` does not contain spatpersist transition diagnostics.")
   }
 
   diagnostics

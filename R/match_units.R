@@ -1,6 +1,6 @@
 # Match units across two observed time periods
 #
-# Internal helper used by create_spatial_ids(). Candidate spatial links are
+# Internal helper used by persist_ids(). Candidate spatial links are
 # ranked deterministically and selected one-to-one.
 #
 match_units <- function(

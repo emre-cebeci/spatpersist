@@ -1,9 +1,9 @@
-# spatialid
+# spatpersist
 
-[![R-CMD-check](https://github.com/emre-cebeci/spatialid/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/emre-cebeci/spatialid/actions/workflows/R-CMD-check.yaml)
-[![test-coverage](https://github.com/emre-cebeci/spatialid/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/emre-cebeci/spatialid/actions/workflows/test-coverage.yaml)
+[![R-CMD-check](https://github.com/emre-cebeci/spatpersist/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/emre-cebeci/spatpersist/actions/workflows/R-CMD-check.yaml)
+[![test-coverage](https://github.com/emre-cebeci/spatpersist/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/emre-cebeci/spatpersist/actions/workflows/test-coverage.yaml)
 
-`spatialid` creates persistent identifiers for polygon units observed over
+`spatpersist` creates persistent identifiers for polygon units observed over
 time. It is designed for datasets in which names, labels, and boundaries may
 change and reliable longitudinal IDs do not already exist.
 
@@ -11,7 +11,7 @@ Identity is determined from configurable spatial continuity rules. Names and
 other descriptive attributes are preserved in the result but are not used for
 matching.
 
-> `spatialid` is under active development. Review transition diagnostics and
+> `spatpersist` is under active development. Review transition diagnostics and
 > validation results before using generated IDs in analysis.
 
 ## Installation
@@ -20,17 +20,17 @@ Install the development version from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("emre-cebeci/spatialid")
+remotes::install_github("emre-cebeci/spatpersist")
 ```
 
 ## Quick start
 
 ```r
-library(spatialid)
+library(spatpersist)
 
-polygons <- spatialid_example()
+polygons <- example_units()
 
-result <- create_spatial_ids(
+result <- persist_ids(
   polygons,
   time = "year",
   threshold = 0.75,
@@ -83,7 +83,7 @@ The core identity rule is controlled by:
 For example, this rejects near ties instead of selecting one deterministically:
 
 ```r
-conservative <- create_spatial_ids(
+conservative <- persist_ids(
   polygons,
   time = "year",
   metric = "iou",
@@ -102,9 +102,9 @@ Every positive-area overlap considered by the matching engine is available as
 a regular data frame:
 
 ```r
-transitions <- spatialid_transitions(result)
-lineages <- spatialid_lineages(result, time = "year")
-issues <- validate_spatial_ids(result, time = "year")
+transitions <- id_transitions(result)
+lineages <- id_lineages(result, time = "year")
+issues <- validate_ids(result, time = "year")
 
 nrow(issues) # zero means all implemented checks passed
 ```
@@ -115,7 +115,7 @@ mutual-best status, selection, confidence, and lineage membership.
 ## Plot a lineage
 
 ```r
-plot_spatial_lineage(
+plot_lineage(
   result,
   time = "year",
   lineage_id = "LID000004"
@@ -132,7 +132,7 @@ geometries retain their issued IDs, while new identities are allocated above
 the registry's existing range.
 
 ```r
-updated_result <- create_spatial_ids(
+updated_result <- persist_ids(
   updated_polygons,
   time = "year",
   registry = result
@@ -166,14 +166,14 @@ controls are also available.
 - Consecutive *observed* periods are compared unless `max_time_gap` prevents a
   link.
 - A single `parent_id` cannot encode every predecessor in a merger; use
-  `spatialid_transitions()` for complete many-to-many evidence.
+  `id_transitions()` for complete many-to-many evidence.
 - A reproducible scalability benchmark is included under
   `inst/benchmarks`; performance still depends strongly on polygon complexity
   and the number of candidate intersections.
 - The package contains no bundled administrative datasets or domain-specific
   assumptions.
 
-See `vignette("spatialid-workflow")` for a complete walkthrough.
+See `vignette("spatpersist-workflow")` for a complete walkthrough.
 
 ## Contributing
 

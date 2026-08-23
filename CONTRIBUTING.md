@@ -1,6 +1,6 @@
-# Contributing to spatialid
+# Contributing to spatpersist
 
-Thank you for helping improve `spatialid`.
+Thank you for helping improve `spatpersist`.
 
 ## Protect private data
 
@@ -38,7 +38,7 @@ Run the standard checks from the repository root:
 ```sh
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual spatialid_*.tar.gz
+R CMD check --no-manual spatpersist_*.tar.gz
 ```
 
 Generated documentation should remain synchronized with its roxygen source.

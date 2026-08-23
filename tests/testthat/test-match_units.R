@@ -8,7 +8,7 @@ test_that("mutual-best matching is stricter than greedy matching", {
     iou = c(0.90, 0.80, 0.85, 0.10)
   )
 
-  greedy <- spatialid:::match_units(
+  greedy <- spatpersist:::match_units(
     overlap,
     threshold = 0.05,
     metric = "iou",
@@ -16,7 +16,7 @@ test_that("mutual-best matching is stricter than greedy matching", {
     ambiguity_tolerance = 0.001,
     ambiguity_action = "flag"
   )
-  mutual <- spatialid:::match_units(
+  mutual <- spatpersist:::match_units(
     overlap,
     threshold = 0.05,
     metric = "iou",
@@ -43,7 +43,7 @@ test_that("ambiguity policies flag, reject, or stop on near ties", {
     iou = c(0.90, 0.88)
   )
 
-  flagged <- spatialid:::match_units(
+  flagged <- spatpersist:::match_units(
     overlap,
     threshold = 0.75,
     metric = "iou",
@@ -51,7 +51,7 @@ test_that("ambiguity policies flag, reject, or stop on near ties", {
     ambiguity_tolerance = 0.05,
     ambiguity_action = "flag"
   )
-  rejected <- spatialid:::match_units(
+  rejected <- spatpersist:::match_units(
     overlap,
     threshold = 0.75,
     metric = "iou",
@@ -66,7 +66,7 @@ test_that("ambiguity policies flag, reject, or stop on near ties", {
   expect_equal(nrow(rejected$selected), 0L)
   expect_false(any(rejected$candidates$candidate))
   expect_error(
-    spatialid:::match_units(
+    spatpersist:::match_units(
       overlap,
       threshold = 0.75,
       metric = "iou",
@@ -88,7 +88,7 @@ test_that("a candidate without competitors uses its overlap as confidence", {
     iou = 0.8
   )
 
-  result <- spatialid:::match_units(
+  result <- spatpersist:::match_units(
     overlap,
     threshold = 0.75,
     metric = "iou",

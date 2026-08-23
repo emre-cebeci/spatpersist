@@ -1,5 +1,5 @@
 name: Bug report
-description: Report reproducible incorrect behavior in spatialid
+description: Report reproducible incorrect behavior in spatpersist
 title: "[Bug]: "
 body:
   - type: markdown
@@ -9,8 +9,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: spatialid version
-      description: Paste the result of `packageVersion("spatialid")` or the Git commit.
+      label: spatpersist version
+      description: Paste the result of `packageVersion("spatpersist")` or the Git commit.
     validations:
       required: true
   - type: textarea

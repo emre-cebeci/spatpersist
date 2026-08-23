@@ -1,6 +1,6 @@
 # Validate and prepare polygon input
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 prepare_spatial_input <- function(data, geometry_action, geometry_precision) {
 
@@ -92,7 +92,7 @@ prepare_spatial_input <- function(data, geometry_action, geometry_precision) {
 
 # Measure the gap between two ordered time values
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 spatial_time_gap <- function(previous_time, current_time) {
 

@@ -1,6 +1,6 @@
 # Assign geometry versions to accepted continuations
 #
-# Internal helper used by create_spatial_ids().
+# Internal helper used by persist_ids().
 #
 assign_continuing_versions <- function(
     overlap,

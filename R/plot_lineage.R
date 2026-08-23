@@ -4,7 +4,7 @@
 #' identity continuations; dashed links are additional spatial lineage
 #' relationships such as split and merger branches.
 #'
-#' @param data A result returned by [create_spatial_ids()].
+#' @param data A result returned by [persist_ids()].
 #' @param time A single character string naming the time column in `data`.
 #' @param lineage_id Optional character vector of lineage IDs to display.
 #'   `NULL` displays every lineage.
@@ -17,10 +17,10 @@
 #' @export
 #'
 #' @examples
-#' result <- create_spatial_ids(spatialid_example(), time = "year")
-#' plot_spatial_lineage(result, time = "year", lineage_id = "LID000004")
+#' result <- persist_ids(example_units(), time = "year")
+#' plot_lineage(result, time = "year", lineage_id = "LID000004")
 #'
-plot_spatial_lineage <- function(
+plot_lineage <- function(
     data,
     time,
     lineage_id = NULL,
@@ -40,10 +40,10 @@ plot_spatial_lineage <- function(
   required_columns <- c("spatial_id", "lineage_id", "transition_type")
   missing_columns <- setdiff(required_columns, names(data))
   if (length(missing_columns) > 0L) {
-    stop("`data` is not a complete spatialid result.")
+    stop("`data` is not a complete spatpersist result.")
   }
 
-  diagnostics <- spatialid_transitions(data)
+  diagnostics <- id_transitions(data)
   available_lineages <- sort(unique(data$lineage_id))
 
   if (is.null(lineage_id)) {

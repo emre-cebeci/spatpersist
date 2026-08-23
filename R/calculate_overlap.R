@@ -1,6 +1,6 @@
 # Calculate spatial overlap between two polygon datasets
 #
-# Internal helper function used by create_spatial_ids().
+# Internal helper function used by persist_ids().
 #
 # Calculates pairwise polygon intersections and returns overlap
 # statistics between two spatial datasets.
@@ -60,14 +60,14 @@ calculate_overlap <- function(old, new) {
   }
   
   # Create internal temporary IDs
-  old$.spatialid_old_id <- seq_len(nrow(old))
-  new$.spatialid_new_id <- seq_len(nrow(new))
+  old$.spatpersist_old_id <- seq_len(nrow(old))
+  new$.spatpersist_new_id <- seq_len(nrow(new))
   
   # Calculate intersections
   intersections <- suppressWarnings(
     sf::st_intersection(
-      old[, ".spatialid_old_id"],
-      new[, ".spatialid_new_id"]
+      old[, ".spatpersist_old_id"],
+      new[, ".spatpersist_new_id"]
     )
   )
   

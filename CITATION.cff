@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
-title: "spatialid: Create Persistent Identifiers for Longitudinal Spatial Data"
+title: "spatpersist: Create Persistent Identifiers for Longitudinal Spatial Data"
 type: software
 authors:
   - family-names: Cebeci
@@ -10,4 +10,4 @@ abstract: >-
   lineages for polygon units observed over time.
 version: 0.1.0
 license: MIT
-repository-code: "https://github.com/emre-cebeci/spatialid"
+repository-code: "https://github.com/emre-cebeci/spatpersist"

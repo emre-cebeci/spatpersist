@@ -1,9 +1,9 @@
-# spatialid scalability benchmark
+# spatpersist scalability benchmark
 
 `benchmark-grid.R` measures the complete ID-creation pipeline on four-period
 regular grids. Each period shifts polygons by 0.05 coordinate units, producing
 a sparse and predictable overlap graph. Every unit should retain one identity,
-and every result is checked with `validate_spatial_ids()`.
+and every result is checked with `validate_ids()`.
 
 After installing the current source package, run:
 

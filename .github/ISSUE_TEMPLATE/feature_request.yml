@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a general improvement to spatialid
+description: Suggest a general improvement to spatpersist
 title: "[Feature]: "
 body:
   - type: markdown

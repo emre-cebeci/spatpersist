@@ -1,5 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.Rcheck$
+^.*\.tar\.gz$
 ^\.github$
 ^CITATION\.cff$
 ^CONTRIBUTING\.md$

@@ -1,10 +1,10 @@
-citHeader("To cite spatialid in publications use:")
+citHeader("To cite spatpersist in publications use:")
 
 bibentry(
   bibtype = "Manual",
-  title = "spatialid: Create Persistent Identifiers for Longitudinal Spatial Data",
+  title = "spatpersist: Create Persistent Identifiers for Longitudinal Spatial Data",
   author = person("Emre", "Cebeci"),
   year = "2026",
   note = paste("R package version", meta$Version),
-  url = "https://github.com/emre-cebeci/spatialid"
+  url = "https://github.com/emre-cebeci/spatpersist"
 )

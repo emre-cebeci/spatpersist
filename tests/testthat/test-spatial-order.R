@@ -11,8 +11,8 @@ test_that("geometry text breaks otherwise identical spatial ordering keys", {
   )
   reversed <- data[2:1, ]
 
-  original_order <- spatialid:::order_spatial_rows(data, 1:2)
-  reversed_order <- spatialid:::order_spatial_rows(reversed, 1:2)
+  original_order <- spatpersist:::order_spatial_rows(data, 1:2)
+  reversed_order <- spatpersist:::order_spatial_rows(reversed, 1:2)
 
   expect_equal(
     data$label[original_order],
@@ -46,7 +46,7 @@ test_that("same-period coextensive geometries are rejected", {
   )
 
   expect_error(
-    create_spatial_ids(data, time = "year"),
+    persist_ids(data, time = "year"),
     paste0(
       "Exact same-period coextensive geometries are unsupported: ",
       "`data` rows 1 and 2.*time `2000`"
@@ -69,7 +69,32 @@ test_that("coextensive geometries in different periods may continue", {
     geometry = sf::st_sfc(polygon, polygon)
   )
 
-  result <- create_spatial_ids(data, time = "year")
+  result <- persist_ids(data, time = "year")
+
+  expect_equal(length(unique(result$spatial_id)), 1L)
+  expect_equal(result$spatial_version_id, rep("SID000001-V001", 2L))
+})
+
+test_that("fractional-second POSIXct values remain distinct periods", {
+  polygon <- sf::st_polygon(
+    list(rbind(
+      c(0, 0),
+      c(1, 0),
+      c(1, 1),
+      c(0, 1),
+      c(0, 0)
+    ))
+  )
+  observed_at <- as.POSIXct(
+    "2025-01-01 00:00:00",
+    tz = "UTC"
+  ) + c(0.125, 0.875)
+  data <- sf::st_sf(
+    observed_at = observed_at,
+    geometry = sf::st_sfc(polygon, polygon)
+  )
+
+  result <- persist_ids(data, time = "observed_at")
 
   expect_equal(length(unique(result$spatial_id)), 1L)
   expect_equal(result$spatial_version_id, rep("SID000001-V001", 2L))
@@ -93,7 +118,7 @@ test_that("geometry precision cannot create same-period duplicates", {
   )
 
   expect_error(
-    create_spatial_ids(data, time = "year", geometry_precision = 1),
+    persist_ids(data, time = "year", geometry_precision = 1),
     "Exact same-period coextensive geometries are unsupported"
   )
 })
