@@ -19,15 +19,15 @@ public distribution requires explicit approval from the package author.
 
 ## Final privacy gate
 
-- [ ] Audit the current tree, ignored files, generated artifacts, and complete
+- [x] Audit the current tree, ignored files, generated artifacts, and complete
       Git history for private data, local paths, credentials, and identifying
       metadata.
-- [ ] Confirm all examples, tests, vignettes, benchmarks, and documentation use
+- [x] Confirm all examples, tests, vignettes, benchmarks, and documentation use
       synthetic or openly licensed public material only.
-- [ ] Remove unsafe files from Git history if the audit finds any, then repeat
+- [x] Remove unsafe files from Git history if the audit finds any, then repeat
       the audit against the rewritten repository.
-- [ ] Inspect the exact source archive that would be distributed.
-- [ ] Build any locally distributed archive with an impersonal creator field,
+- [x] Inspect the exact source archive that would be distributed.
+- [x] Build any locally distributed archive with an impersonal creator field,
       for example `R CMD build --user=spatialid-release spatialid`.
 
 ## Publication gate
