@@ -155,7 +155,9 @@ controls are also available.
   link.
 - A single `parent_id` cannot encode every predecessor in a merger; use
   `spatialid_transitions()` for complete many-to-many evidence.
-- Large-dataset benchmarking and optimization remain ongoing.
+- A reproducible scalability benchmark is included under
+  `inst/benchmarks`; performance still depends strongly on polygon complexity
+  and the number of candidate intersections.
 - The package contains no bundled administrative datasets or domain-specific administrative
   assumptions.
 

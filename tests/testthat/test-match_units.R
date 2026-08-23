@@ -26,6 +26,7 @@ test_that("mutual-best matching is stricter than greedy matching", {
   )
 
   expect_equal(nrow(greedy$selected), 2L)
+  expect_equal(greedy$selected$confidence, c(0.05, 0), tolerance = 1e-10)
   expect_equal(nrow(mutual$selected), 1L)
   expect_equal(mutual$selected$old_id, 1L)
   expect_equal(mutual$selected$new_id, 1L)
@@ -75,4 +76,26 @@ test_that("ambiguity policies flag, reject, or stop on near ties", {
     ),
     "Ambiguous spatial matches detected"
   )
+})
+
+test_that("a candidate without competitors uses its overlap as confidence", {
+  overlap <- data.frame(
+    old_id = 1L,
+    new_id = 1L,
+    intersection_area = 80,
+    share_old = 0.8,
+    share_new = 0.8,
+    iou = 0.8
+  )
+
+  result <- spatialid:::match_units(
+    overlap,
+    threshold = 0.75,
+    metric = "iou",
+    match_rule = "greedy",
+    ambiguity_tolerance = 0.05,
+    ambiguity_action = "flag"
+  )
+
+  expect_equal(result$selected$confidence, 0.8)
 })

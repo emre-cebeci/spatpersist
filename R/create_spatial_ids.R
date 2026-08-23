@@ -190,6 +190,12 @@ create_spatial_ids <- function(
   )
 
   observed_times <- sort(unique(data[[time]]))
+  rows_by_time <- lapply(
+    observed_times,
+    function(observed_time) {
+      order_spatial_rows(data, which(data[[time]] == observed_time))
+    }
+  )
   spatial_ids <- rep(NA_character_, nrow(data))
   version_numbers <- rep(NA_integer_, nrow(data))
   parent_ids <- rep(NA_character_, nrow(data))
@@ -200,8 +206,7 @@ create_spatial_ids <- function(
   transition_edges <- list()
   next_id <- 1L
 
-  first_rows <- which(data[[time]] == observed_times[[1L]])
-  first_rows <- order_spatial_rows(data, first_rows)
+  first_rows <- rows_by_time[[1L]]
   first_numbers <- seq.int(next_id, length.out = length(first_rows))
   spatial_ids[first_rows] <- sprintf("SID%06d", first_numbers)
   version_numbers[first_rows] <- 1L
@@ -210,10 +215,8 @@ create_spatial_ids <- function(
 
   if (length(observed_times) > 1L) {
     for (period in seq.int(2L, length(observed_times))) {
-      old_rows <- which(data[[time]] == observed_times[[period - 1L]])
-      new_rows <- which(data[[time]] == observed_times[[period]])
-      old_rows <- order_spatial_rows(data, old_rows)
-      new_rows <- order_spatial_rows(data, new_rows)
+      old_rows <- rows_by_time[[period - 1L]]
+      new_rows <- rows_by_time[[period]]
 
       if (is.finite(max_time_gap)) {
         gap <- spatial_time_gap(

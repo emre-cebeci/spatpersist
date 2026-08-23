@@ -22,54 +22,63 @@ describe_transitions <- function(
     )
   }
 
-  for (new_id in seq_len(n_new)) {
-    candidates <- overlap[overlap$new_id == new_id, ]
+  candidate_strength <- pmax(overlap$share_old, overlap$share_new)
+  strongest_order <- order(
+    overlap$new_id,
+    -candidate_strength,
+    -overlap$iou,
+    -overlap$intersection_area,
+    overlap$old_id
+  )
+  strongest_rows <- strongest_order[
+    !duplicated(overlap$new_id[strongest_order])
+  ]
 
-    if (nrow(candidates) == 0L) {
-      next
-    }
+  reference_old <- rep(NA_integer_, n_new)
+  reference_old[overlap$new_id[strongest_rows]] <-
+    overlap$old_id[strongest_rows]
 
-    selected_old <- matches$old_id[matches$new_id == new_id]
-    is_continuation <- length(selected_old) == 1L
+  selected_old <- rep(NA_integer_, n_new)
+  selected_old[matches$new_id] <- matches$old_id
+  is_continuation <- !is.na(selected_old)
+  reference_old[is_continuation] <- selected_old[is_continuation]
 
-    if (is_continuation) {
-      reference_old <- selected_old[[1L]]
-    } else {
-      candidate_strength <- pmax(candidates$share_old, candidates$share_new)
-      candidate_order <- order(
-        -candidate_strength,
-        -candidates$iou,
-        -candidates$intersection_area,
-        candidates$old_id
-      )
-      reference_old <- candidates$old_id[candidate_order[[1L]]]
-    }
+  predecessor_count <- tabulate(
+    overlap$new_id[overlap$share_new >= event_threshold],
+    nbins = n_new
+  )
+  successor_count_by_old <- tabulate(
+    overlap$old_id[overlap$share_old >= event_threshold],
+    nbins = max(overlap$old_id)
+  )
+  successor_count <- rep(0L, n_new)
+  has_reference <- !is.na(reference_old)
+  successor_count[has_reference] <-
+    successor_count_by_old[reference_old[has_reference]]
+  has_lineage_link <- tabulate(
+    overlap$new_id[candidate_strength >= lineage_threshold],
+    nbins = n_new
+  ) > 0L
 
-    predecessor_count <- sum(candidates$share_new >= event_threshold)
-    successor_count <- sum(
-      overlap$old_id == reference_old &
-        overlap$share_old >= event_threshold
-    )
-    has_lineage_link <- any(
-      pmax(candidates$share_old, candidates$share_new) >= lineage_threshold
-    )
+  transition_type[
+    predecessor_count > 1L & successor_count > 1L
+  ] <- "complex"
+  transition_type[
+    predecessor_count > 1L & successor_count <= 1L
+  ] <- "merger"
+  transition_type[
+    predecessor_count <= 1L & successor_count > 1L
+  ] <- "split"
+  transition_type[
+    predecessor_count <= 1L & successor_count <= 1L & is_continuation
+  ] <- "continuation"
+  transition_type[
+    predecessor_count <= 1L & successor_count <= 1L &
+      !is_continuation & has_lineage_link
+  ] <- "replacement"
 
-    if (predecessor_count > 1L && successor_count > 1L) {
-      transition_type[[new_id]] <- "complex"
-    } else if (predecessor_count > 1L) {
-      transition_type[[new_id]] <- "merger"
-    } else if (successor_count > 1L) {
-      transition_type[[new_id]] <- "split"
-    } else if (is_continuation) {
-      transition_type[[new_id]] <- "continuation"
-    } else if (has_lineage_link) {
-      transition_type[[new_id]] <- "replacement"
-    }
-
-    if (!is_continuation && has_lineage_link) {
-      parent_id[[new_id]] <- old_spatial_ids[[reference_old]]
-    }
-  }
+  has_parent <- !is_continuation & has_lineage_link & has_reference
+  parent_id[has_parent] <- old_spatial_ids[reference_old[has_parent]]
 
   list(
     transition_type = transition_type,

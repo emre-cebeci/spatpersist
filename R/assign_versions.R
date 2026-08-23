@@ -15,21 +15,21 @@ assign_continuing_versions <- function(
     return(new_version_numbers)
   }
 
-  for (i in seq_len(nrow(matches))) {
-    old_id <- matches$old_id[[i]]
-    new_id <- matches$new_id[[i]]
-    edge <- overlap[
-      overlap$old_id == old_id & overlap$new_id == new_id,
-    ]
+  edge_base <- max(c(overlap$new_id, matches$new_id))
+  overlap_keys <- (overlap$old_id - 1L) * edge_base + overlap$new_id
+  match_keys <- (matches$old_id - 1L) * edge_base + matches$new_id
+  edge_rows <- match(match_keys, overlap_keys)
+  duplicated_overlap_keys <- unique(
+    overlap_keys[duplicated(overlap_keys)]
+  )
 
-    if (nrow(edge) != 1L) {
-      stop("Internal error: a selected match must have exactly one overlap edge.")
-    }
-
-    geometry_changed <- edge$iou[[1L]] < version_threshold
-    new_version_numbers[[new_id]] <-
-      old_version_numbers[[old_id]] + as.integer(geometry_changed)
+  if (anyNA(edge_rows) || any(match_keys %in% duplicated_overlap_keys)) {
+    stop("Internal error: a selected match must have exactly one overlap edge.")
   }
+
+  geometry_changed <- overlap$iou[edge_rows] < version_threshold
+  new_version_numbers[matches$new_id] <-
+    old_version_numbers[matches$old_id] + as.integer(geometry_changed)
 
   new_version_numbers
 }

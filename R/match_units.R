@@ -42,39 +42,45 @@ match_units <- function(
   scores <- overlap[[metric]]
   eligible <- is.finite(scores) & scores >= threshold
 
-  best_in_group <- function(group_values) {
-    result <- logical(nrow(overlap))
+  group_diagnostics <- function(group_values) {
+    best <- logical(nrow(overlap))
+    ambiguous <- logical(nrow(overlap))
+    competition_margin <- rep(1, nrow(overlap))
     eligible_rows <- which(eligible)
     groups <- split(eligible_rows, group_values[eligible_rows])
 
     for (rows in groups) {
-      result[rows] <- scores[rows] == max(scores[rows])
-    }
+      group_scores <- scores[rows]
+      best_score <- max(group_scores)
+      best_rows <- rows[group_scores == best_score]
+      best[best_rows] <- TRUE
 
-    result
-  }
-
-  ambiguous_in_group <- function(group_values) {
-    result <- logical(nrow(overlap))
-    eligible_rows <- which(eligible)
-    groups <- split(eligible_rows, group_values[eligible_rows])
-
-    for (rows in groups) {
-      best_score <- max(scores[rows])
-      near_best <- rows[best_score - scores[rows] <= ambiguity_tolerance]
+      near_best <- rows[best_score - group_scores <= ambiguity_tolerance]
       if (length(near_best) > 1L) {
-        result[near_best] <- TRUE
+        ambiguous[near_best] <- TRUE
+      }
+
+      if (length(rows) > 1L) {
+        competition_margin[rows] <- 0
+        if (length(best_rows) == 1L) {
+          second_best <- max(group_scores[group_scores < best_score])
+          competition_margin[best_rows] <- best_score - second_best
+        }
       }
     }
 
-    result
+    list(
+      best = best,
+      ambiguous = ambiguous,
+      competition_margin = competition_margin
+    )
   }
 
-  best_for_old <- best_in_group(overlap$old_id)
-  best_for_new <- best_in_group(overlap$new_id)
-  mutual_best <- best_for_old & best_for_new
-  ambiguous <- ambiguous_in_group(overlap$old_id) |
-    ambiguous_in_group(overlap$new_id)
+  old_diagnostics <- group_diagnostics(overlap$old_id)
+  new_diagnostics <- group_diagnostics(overlap$new_id)
+  mutual_best <- old_diagnostics$best & new_diagnostics$best
+  ambiguous <- old_diagnostics$ambiguous |
+    new_diagnostics$ambiguous
 
   rule_candidate <- eligible
   if (match_rule == "mutual_best") {
@@ -130,46 +136,29 @@ match_units <- function(
     )
   ]
 
-  selected_rows <- integer()
-  used_old <- integer()
-  used_new <- integer()
+  selected_rows <- integer(length(candidate_rows))
+  selected_count <- 0L
+  used_old <- logical(max(overlap$old_id))
+  used_new <- logical(max(overlap$new_id))
 
   for (row in candidate_rows) {
     old_id <- overlap$old_id[[row]]
     new_id <- overlap$new_id[[row]]
 
-    if (!(old_id %in% used_old) && !(new_id %in% used_new)) {
-      selected_rows <- c(selected_rows, row)
-      used_old <- c(used_old, old_id)
-      used_new <- c(used_new, new_id)
+    if (!used_old[[old_id]] && !used_new[[new_id]]) {
+      selected_count <- selected_count + 1L
+      selected_rows[[selected_count]] <- row
+      used_old[[old_id]] <- TRUE
+      used_new[[new_id]] <- TRUE
     }
   }
+  selected_rows <- selected_rows[seq_len(selected_count)]
 
-  competition_margin <- function(row, group_values) {
-    competitors <- which(
-      eligible &
-        group_values == group_values[[row]] &
-        seq_len(nrow(overlap)) != row
-    )
-
-    if (length(competitors) == 0L) {
-      return(1)
-    }
-
-    max(0, scores[[row]] - max(scores[competitors]))
-  }
-
-  confidence <- vapply(
-    selected_rows,
-    function(row) {
-      min(
-        1,
-        scores[[row]],
-        competition_margin(row, overlap$old_id),
-        competition_margin(row, overlap$new_id)
-      )
-    },
-    numeric(1)
+  confidence <- pmin(
+    1,
+    scores[selected_rows],
+    old_diagnostics$competition_margin[selected_rows],
+    new_diagnostics$competition_margin[selected_rows]
   )
 
   selected <- data.frame(
