@@ -10,11 +10,11 @@ spatialid_example()
 An sf object containing synthetic polygons.
 }
 \description{
-Generates a small synthetic spatial dataset for testing
-spatialid functions. The example contains spatial units
-observed across multiple years.
+Generates synthetic polygon data showing common spatial
+continuity problems: stable units, boundary changes,
+renames, and splits.
 }
 \examples{
-example_data <- spatialid_example()
-example_data
+data <- spatialid_example()
+plot(data["name"])
 }
