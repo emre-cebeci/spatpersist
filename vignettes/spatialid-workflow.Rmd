@@ -1,0 +1,223 @@
+---
+title: "Creating Persistent Spatial Identifiers"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating Persistent Spatial Identifiers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 4.5
+)
+```
+
+## The problem
+
+Longitudinal polygon datasets often lack identifiers that remain meaningful
+when boundaries or labels change. `spatialid` creates those identifiers from
+spatial continuity. It does not require prior IDs and does not use names to
+determine identity.
+
+This vignette uses a synthetic dataset containing four common cases:
+
+- a stable polygon;
+- a polygon with an expanded boundary;
+- an unchanged polygon with a new name;
+- one polygon that splits into two successors.
+
+```{r example-data}
+library(spatialid)
+
+polygons <- spatialid_example()
+sf::st_drop_geometry(polygons)
+```
+
+## Create IDs
+
+The default rule continues an identity when at least 75 percent of the earlier
+polygon is preserved. Candidate links are selected one-to-one.
+
+```{r create}
+result <- create_spatial_ids(
+  polygons,
+  time = "year",
+  threshold = 0.75,
+  metric = "share_old"
+)
+
+sf::st_drop_geometry(result)[
+  , c(
+    "year",
+    "name",
+    "spatial_id",
+    "spatial_version_id",
+    "lineage_id",
+    "parent_id",
+    "transition_type"
+  )
+]
+```
+
+The output separates four concepts:
+
+1. `spatial_id` identifies one continuing unit.
+2. `spatial_version_id` identifies consecutive boundary spells within that
+   unit.
+3. `lineage_id` connects related units through splits, mergers, or
+   replacements.
+4. `parent_id` records the strongest predecessor when a related observation
+   starts a new identity.
+
+The renamed polygon retains its identity because its geometry is unchanged.
+The expanded polygon retains its identity but advances to a new geometry
+version. Under the default rule, neither half of the split preserves 75 percent
+of the old polygon, so both receive new identities while remaining in the old
+polygon's lineage.
+
+## Matching rules and ambiguity
+
+Three spatial metrics are available:
+
+- `share_old`: intersection divided by predecessor area;
+- `share_new`: intersection divided by successor area;
+- `iou`: intersection divided by union area.
+
+`match_rule = "greedy"` ranks all eligible links and selects them one-to-one.
+`match_rule = "mutual_best"` considers only links that are best for both sides.
+
+Near ties are controlled separately:
+
+```{r conservative-matching}
+conservative <- create_spatial_ids(
+  polygons,
+  time = "year",
+  metric = "iou",
+  threshold = 0.75,
+  match_rule = "mutual_best",
+  ambiguity_tolerance = 0.05,
+  ambiguity_action = "new"
+)
+```
+
+The three ambiguity actions are:
+
+- `"flag"`: select deterministically and set `match_ambiguous = TRUE`;
+- `"new"`: reject near-tied links and start new identities;
+- `"error"`: stop so the user can inspect the evidence.
+
+`match_confidence` combines the selected spatial score with its separation from
+eligible competitors. A score near zero indicates a tie or a candidate that
+lost a stronger competing link.
+
+## Audit transitions
+
+Automatic identity decisions should remain inspectable. The transition table
+contains every positive-area overlap, not just selected links.
+
+```{r diagnostics}
+transitions <- spatialid_transitions(result)
+transitions[
+  , c(
+    "old_spatial_id",
+    "new_spatial_id",
+    "share_old",
+    "share_new",
+    "iou",
+    "eligible",
+    "mutual_best",
+    "ambiguous",
+    "selected",
+    "lineage_link"
+  )
+]
+```
+
+An identity-level summary is also available:
+
+```{r summaries}
+spatialid_lineages(result, time = "year")
+```
+
+## Visualize splits and mergers
+
+```{r plot-lineage}
+plot_spatial_lineage(
+  result,
+  time = "year",
+  lineage_id = "LID000004"
+)
+```
+
+Solid edges are selected identity continuations. Dashed edges are broader
+lineage links. In the example, the two dashed branches show the split without
+forcing either child to reuse the predecessor's identity.
+
+## Validate the result
+
+```{r validate}
+issues <- validate_spatial_ids(result, time = "year")
+issues
+```
+
+A zero-row issue table means the result passed all implemented checks. These
+include within-period uniqueness, lineage consistency, sequential geometry
+versions, parent availability, transition labels, and match diagnostics.
+
+Validation confirms structural consistency; it does not prove that a chosen
+spatial continuity rule is substantively correct for a particular research
+design. Thresholds and diagnostics should still be reviewed.
+
+## Preserve IDs across reruns
+
+Passing a prior result as `registry` protects issued IDs when rows are reordered
+or new units are added.
+
+```{r registry}
+rerun <- create_spatial_ids(
+  polygons,
+  time = "year",
+  registry = result
+)
+
+all(rerun$registry_matched)
+identical(rerun$spatial_id, result$spatial_id)
+```
+
+Registry recovery uses same-time geometry and defaults to an IoU of 0.999999.
+Conflicts stop with an error. New identities are numbered above the registry's
+largest existing spatial ID.
+
+## Geometry and time controls
+
+By default, invalid geometries stop processing. They can be repaired
+explicitly:
+
+```r
+result <- create_spatial_ids(
+  polygons,
+  time = "year",
+  geometry_action = "repair"
+)
+```
+
+`geometry_precision` sets an `sf` precision scale before spatial operations.
+For example, `geometry_precision = 100` rounds coordinates to two decimal
+places when geometries are passed to spatial libraries.
+
+`max_time_gap` prevents continuity across large gaps in numeric or date-based
+time columns. Its units are the time column's numeric units, days for `Date`,
+and seconds for `POSIXt`.
+
+## Interpretation limits
+
+- Names and descriptive fields do not determine identity.
+- Matching is one-to-one even though lineage relationships may be many-to-many.
+- `parent_id` stores one strongest predecessor; the transition table contains
+  complete merger evidence.
+- Registry IDs use the package formats `SID000001` and `SID000001-V001`.
+- Thresholds encode research decisions and should be reported with results.
