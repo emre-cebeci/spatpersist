@@ -8,6 +8,7 @@
 ^LICENSE\.md$
 ^RELEASE_CHECKLIST\.md$
 ^.*\.(gpkg|shp|shx|dbf|prj|cpg|xlsx|xls|csv|tsv|parquet|feather|sqlite|RData|rda|rdata|swp|swo|swx)$
+^(?!build/vignette\.rds$).*\.rds$
 ^.*~$
 ^\.DS_Store$
 ^(private|local-data|validation-output|calibration-output)$

@@ -40,3 +40,97 @@ jobs:
             printf '%s\n' "Local filesystem paths detected:" "$matches"
             exit 1
           fi
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          needs: check
+
+      - name: Audit built source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          Rscript -e 'saveRDS(list(harmless = TRUE), "privacy_probe.rds")'
+          cleanup_probe() {
+            if [[ -e privacy_probe.rds ]]; then
+              rm -- privacy_probe.rds
+            fi
+          }
+          trap cleanup_probe EXIT
+
+          R CMD build .
+          archives="$(
+            find . -maxdepth 1 -type f -name 'spatpersist_*.tar.gz' -print
+          )"
+          archive_count="$(
+            printf '%s\n' "$archives" | sed '/^$/d' | wc -l | tr -d ' '
+          )"
+          if [[ "$archive_count" != 1 ]]; then
+            printf '%s\n' "Expected exactly one source archive." "$archives"
+            exit 1
+          fi
+          archive="$archives"
+          archive_paths="$(tar -tzf "$archive")"
+
+          rds_paths="$(
+            printf '%s\n' "$archive_paths" | grep -E -i '\.rds$' || true
+          )"
+          if [[ "$rds_paths" != 'spatpersist/build/vignette.rds' ]]; then
+            printf '%s\n' "Unexpected .rds paths in source archive:" "$rds_paths"
+            exit 1
+          fi
+          if grep -q -x 'spatpersist/privacy_probe.rds' <<< "$archive_paths"; then
+            printf '%s\n' "The synthetic privacy probe entered the archive."
+            exit 1
+          fi
+          cleanup_probe
+          trap - EXIT
+
+          forbidden="$({
+            printf '%s\n' "$archive_paths" | grep -E -i '\.(gpkg|shp|shx|dbf|prj|cpg|xlsx|xls|csv|tsv|parquet|feather|sqlite|RData|rda|rdata|swp|swo|swx)$'
+            printf '%s\n' "$archive_paths" | grep -E -i '(^|/)(private|local-data|validation-output|calibration-output)(/|$)'
+            printf '%s\n' "$archive_paths" | grep -E -i '(^|/)(\.DS_Store|\.Rhistory|\.Rproj\.user|\.RDataTmp)($|/)|(~|\.swp|\.swo|\.swx|\.utf8\.md|\.knit\.md)$|(^|/)[^/]*_cache/'
+          } || true)"
+          if [[ -n "$forbidden" ]]; then
+            printf '%s\n' "Forbidden paths in source archive:" "$forbidden"
+            exit 1
+          fi
+
+          archive_root="$(mktemp -d)"
+          tar -xzf "$archive" -C "$archive_root"
+          sensitive="$({
+            grep -R -I -n -E '/Users/[^/]+/|[A-Za-z]:\\Users\\[^\\]+\\|Mobile Documents/com~apple~CloudDocs' "$archive_root/spatpersist"
+            grep -R -I -n -E 'github_pat_|ghp_[A-Za-z0-9]+|sk-[A-Za-z0-9]{16,}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY' "$archive_root/spatpersist"
+          } || true)"
+          if [[ -n "$sensitive" ]]; then
+            printf '%s\n' "Sensitive text in source archive:" "$sensitive"
+            exit 1
+          fi
+
+          Rscript - "$archive_root/spatpersist/build/vignette.rds" <<'RSCRIPT'
+          contents <- paste(
+            capture.output(dput(readRDS(commandArgs(trailingOnly = TRUE)[1]))),
+            collapse = "\n"
+          )
+          sensitive <- grepl(
+            paste0(
+              "/Users/[^/]+/|",
+              "[A-Za-z]:\\\\Users\\\\[^\\\\]+\\\\|",
+              "Mobile Documents/com~apple~CloudDocs|",
+              "github_pat_|ghp_[A-Za-z0-9]+|",
+              "sk-[A-Za-z0-9]{16,}|",
+              "BEGIN (RSA|OPENSSH|EC) PRIVATE KEY"
+            ),
+            contents
+          )
+          if (sensitive) {
+            stop("Sensitive text found in build/vignette.rds.", call. = FALSE)
+          }
+          RSCRIPT
