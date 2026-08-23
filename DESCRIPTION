@@ -1,11 +1,19 @@
 Package: spatialid
-Title: What the Package Does (One Line, Title Case)
+Title: Create Persistent Identifiers for Longitudinal Spatial Data
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R:
+    person(
+      "Emre",
+      "Cebeci",
+      email = "cebeciemre1@gmail.com",
+      role = c("aut", "cre")
+    )
+Description:
+    Provides tools for creating persistent identifiers for spatial
+    units observed across time. The package supports configurable
+    rules for identifying continuity, boundary changes, and spatial
+    lineages in longitudinal polygon datasets.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.1.0
