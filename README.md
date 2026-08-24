@@ -179,5 +179,5 @@ See `vignette("spatpersist-workflow")` for a complete walkthrough.
 
 Bug reports and contributions are welcome. Please use only synthetic or public
 data in issues, examples, and pull requests; do not upload confidential or
-restricted datasets. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development
+restricted datasets. See [CONTRIBUTING.md](https://github.com/emre-cebeci/spatpersist/blob/main/CONTRIBUTING.md) for the development
 and reporting workflow.
