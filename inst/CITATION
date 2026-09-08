@@ -6,5 +6,6 @@ bibentry(
   author = person("Emre", "Cebeci"),
   year = "2026",
   note = paste("R package version", meta$Version),
+  doi = "10.32614/CRAN.package.spatpersist",
   url = "https://github.com/emre-cebeci/spatpersist"
 )

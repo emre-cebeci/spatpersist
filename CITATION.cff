@@ -9,5 +9,6 @@ abstract: >-
   Tools for creating persistent identifiers, boundary versions, and spatial
   lineages for polygon units observed over time.
 version: 0.1.0
+doi: "10.32614/CRAN.package.spatpersist"
 license: MIT
 repository-code: "https://github.com/emre-cebeci/spatpersist"

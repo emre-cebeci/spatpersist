@@ -1,5 +1,6 @@
 # spatpersist
 
+[![CRAN version](https://img.shields.io/badge/CRAN-0.1.0-brightgreen)](https://CRAN.R-project.org/package=spatpersist)
 [![R-CMD-check](https://github.com/emre-cebeci/spatpersist/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/emre-cebeci/spatpersist/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/emre-cebeci/spatpersist/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/emre-cebeci/spatpersist/actions/workflows/test-coverage.yaml)
 
@@ -11,12 +12,18 @@ Identity is determined from configurable spatial continuity rules. Names and
 other descriptive attributes are preserved in the result but are not used for
 matching.
 
-> `spatpersist` is under active development. Review transition diagnostics and
+> `spatpersist` is available on CRAN. Review transition diagnostics and
 > validation results before using generated IDs in analysis.
 
 ## Installation
 
-Install the development version from GitHub:
+Install the released version from CRAN:
+
+```r
+install.packages("spatpersist")
+```
+
+Alternatively, install the development version from GitHub:
 
 ```r
 # install.packages("remotes")
@@ -174,6 +181,20 @@ controls are also available.
   assumptions.
 
 See `vignette("spatpersist-workflow")` for a complete walkthrough.
+
+## Citation
+
+If you use `spatpersist` in your research, please cite:
+
+> Cebeci E (2026). *spatpersist: Create Persistent Identifiers for Longitudinal
+> Spatial Data*. R package version 0.1.0.
+> [doi:10.32614/CRAN.package.spatpersist](https://doi.org/10.32614/CRAN.package.spatpersist).
+
+To retrieve the citation for your installed version, run:
+
+```r
+citation("spatpersist")
+```
 
 ## Contributing
 
