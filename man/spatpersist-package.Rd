@@ -13,18 +13,54 @@ structural transition. Matching is based on polygon overlap and is designed
 to remain auditable through explicit scores, confidence flags, transition
 tables, and validation checks.
 }
-\section{Main workflow}{
+\section{Start here}{
 
-Use \code{\link[=persist_ids]{persist_ids()}} to assign identifiers to a time-indexed \code{sf}
-object. Inspect the result with \code{\link[=id_transitions]{id_transitions()}} and
-\code{\link[=id_lineages]{id_lineages()}}, and run \code{\link[=validate_ids]{validate_ids()}} before relying on
-the identifiers downstream. \code{\link[=plot_lineage]{plot_lineage()}} provides a compact
-visual check of one lineage through time.
+Pass an \code{sf} object with \code{POLYGON} or \code{MULTIPOLYGON} geometries and a
+non-missing, sortable time column to \code{\link[=persist_ids]{persist_ids()}}. Each row represents
+one polygon in one observed period. For a runnable synthetic example, see
+\strong{Examples} below; no external spatial data are needed.
+}
+
+\section{Choose a continuity rule}{
+
+\code{threshold} is the minimum overlap score for continuing an identity;
+its default is 0.75. The default \code{metric = "share_old"} divides intersection
+area by the earlier polygon's area. \code{"share_new"} uses the later polygon's
+area, while \code{"iou"} divides by the union area. These choices can change
+which boundaries count as continuations. \code{\link[=persist_ids]{persist_ids()}} also offers
+\code{match_rule}, ambiguity controls, and separate thresholds for events,
+lineages, and geometry versions. Review the resulting links before using
+IDs in analysis.
+}
+
+\section{Read the result}{
+
+\code{\link[=persist_ids]{persist_ids()}} returns the input \code{sf} rows in their original order with
+new columns. \code{spatial_id} denotes one continuing identity;
+\code{spatial_version_id} distinguishes boundary spells within it;
+\code{lineage_id} groups related identities across structural changes;
+\code{parent_id} records one strongest predecessor for a new identity; and
+\code{transition_type} labels the observed transition. A changed boundary can
+keep its \code{spatial_id} while receiving a new \code{spatial_version_id}.
+\code{match_score}, \code{match_confidence}, and \code{match_ambiguous} help flag links
+for review. A single \code{parent_id} cannot describe every predecessor in a
+merger.
+}
+
+\section{Audit the assignment}{
+
+\code{\link[=id_transitions]{id_transitions()}} exposes the considered positive-area links and their
+overlap scores, eligibility, selection, and ambiguity flags.
+\code{\link[=id_lineages]{id_lineages()}} summarizes identities within lineages.
+\code{\link[=validate_ids]{validate_ids()}} checks structural consistency; a zero-row issue table
+means the implemented checks passed, not that every assignment is
+substantively correct. \code{\link[=plot_lineage]{plot_lineage()}} draws one lineage for visual
+inspection. See the workflow vignette for calibration guidance.
 }
 
 \section{Reproducible reruns}{
 
-A registry written by \code{\link[=persist_ids]{persist_ids()}} can be supplied to a later run
+A prior result from \code{\link[=persist_ids]{persist_ids()}} can be supplied as \code{registry} to a later run
 so that already-observed units retain their identifiers. Registry matches
 are reported in the \code{registry_matched} output column. If new spatial evidence
 connects multiple prior lineages, they consolidate under the smallest
@@ -35,13 +71,33 @@ existing lineage identifier.
 
 A persistent ID represents continuity under the selected overlap rule; it is
 not a claim that the polygon is geometrically unchanged. Geometry changes
-receive new version IDs. Splits, merges, births, deaths, and ambiguous
-candidates remain visible in the audit outputs rather than being silently
-collapsed. All identifiers are dataset-local, not globally unique: their
-persistence is scoped to one dataset and its registry chain.
+may receive new version IDs. Names and other descriptive attributes do not
+determine matches. Exact coextensive polygons within the same period are
+rejected because geometry alone cannot distinguish them reproducibly.
+All identifiers are dataset-local, not globally unique: their persistence
+is scoped to one dataset and its registry chain.
 }
 
+\examples{
+units <- example_units()
+ids <- persist_ids(units, time = "year", threshold = 0.75)
+
+# The input rows and geometry remain available alongside the new columns.
+sf::st_drop_geometry(ids)[
+  , c("year", "name", "spatial_id", "spatial_version_id",
+      "lineage_id", "transition_type")
+]
+
+# Check the links and structural consistency of the IDs.
+links <- id_transitions(ids)
+head(links[, c("old_spatial_id", "new_spatial_id", "match_score",
+               "selected")])
+head(id_lineages(ids, time = "year"))
+validate_ids(ids, time = "year")
+}
 \seealso{
+\code{\link[=persist_ids]{persist_ids()}}, \code{\link[=id_transitions]{id_transitions()}}, \code{\link[=id_lineages]{id_lineages()}},
+\code{\link[=validate_ids]{validate_ids()}}, \code{\link[=plot_lineage]{plot_lineage()}}, \code{\link[=example_units]{example_units()}},
 \code{vignette("spatpersist-workflow", package = "spatpersist")}
 }
 \author{
